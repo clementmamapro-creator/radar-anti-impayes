@@ -52,17 +52,27 @@ python -m radar serve
 
 `inspect` est à lancer en premier : les noms de colonnes des jeux ouverts ne sont pas documentés de façon stable, et le mapping est centralisé dans `config.yaml`. Le workflow GitHub Actions `pipeline.yml` exécute ces étapes chaque lundi (ou à la demande) et publie les métriques dans le résumé du run.
 
-## Résultats sur données synthétiques
+## Résultats sur données réelles
 
-Ces chiffres valident la mécanique du pipeline, **pas** la qualité du modèle sur de vraies entreprises.
+Données publiques complètes : 3,4 millions d'annonces BODACC, 6,8 millions de bilans (1,6 million d'entreprises), 726 000 ouvertures de procédure. Entraînement sur 5,7 millions de bilans observés de 2006 à 2024 ; test sur 599 000 bilans observés en 2025 (taux de défaillance réel : 0,89 %).
 
 | Modèle | ROC AUC | PR AUC | Rappel top 10 % | Brier |
 |---|---|---|---|---|
-| Régression logistique | 0,774 | 0,164 | 40 % | 0,152 |
-| LightGBM | 0,742 | 0,171 | 38 % | 0,095 |
-| LightGBM calibré | 0,734 | 0,155 | 33 % | 0,035 |
+| Régression logistique | 0,556 | 0,011 | 13 % | 0,226 |
+| LightGBM | 0,824 | 0,052 | 50 % | 0,159 |
+| **LightGBM calibré** | **0,825** | **0,052** | **50 %** | **0,009** |
 
-Entraînement 2017-2023 (20 320 bilans, 4,4 % de défaillances), test 2024 (2 090 bilans). La référence logistique fait jeu égal parce que le risque y est simulé de façon linéaire. La calibration dégrade légèrement le classement mais rend la probabilité exploitable (Brier divisé par 4) : c'est elle que l'interface affiche.
+Parmi les 10 % d'entreprises jugées les plus risquées, on retrouve la moitié des défaillances de l'année suivante.
+
+**Niveaux de risque.** Les seuils de 2 % et 6 % sont validés par les taux observés en 2025 :
+
+| Niveau | Probabilité estimée | Part des entreprises | Défaillances observées |
+|---|---|---|---|
+| Faible | < 2 % | 91,5 % | 0,53 % |
+| Modéré | 2 à 6 % | 7,3 % | 4,0 % |
+| Élevé | ≥ 6 % | 1,2 % | 9,2 % |
+
+La référence logistique s'effondre sur les données réelles, à cause des valeurs extrêmes des ratios : un bornage (winsorisation) est prévu. Les tests automatiques, eux, tournent sur des données synthétiques au format des sources.
 
 ## Choix techniques
 
@@ -75,7 +85,6 @@ Entraînement 2017-2023 (20 320 bilans, 4,4 % de défaillances), test 2024 (2 09
 
 - Beaucoup de micro-entreprises ne publient pas leurs comptes : l'outil répond alors « données insuffisantes » plutôt que d'inventer un score.
 - Les comptes ont souvent plus d'un an au moment du scoring.
-- Les seuils de niveau (2 % et 6 %) sont à recalibrer sur les vraies données.
 
 ## Feuille de route
 
