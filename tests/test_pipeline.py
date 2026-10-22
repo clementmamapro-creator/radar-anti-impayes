@@ -37,6 +37,20 @@ def test_extract_sirens_formats():
     assert extract_sirens("RCS Paris 123 456 789") == ["123456789"]
 
 
+def test_dates_aberrantes_ecartees(cfg):
+    from radar.transform import normalize_bilans
+
+    rc, rf = cfg.ratios["columns"], cfg.ratios["features"]
+    raw = pd.DataFrame({
+        rc["siren"]: ["123456789"] * 3,
+        rc["date_cloture"]: ["1919-09-30", "2023-12-31", "2099-12-31"],
+        rc["type_bilan"]: ["C"] * 3,
+        rf["chiffre_affaires"]: [1.0, 2.0, 3.0],
+    })
+    out = normalize_bilans(raw, cfg)
+    assert list(out["date_cloture"].dt.year) == [2023]
+
+
 def test_parse_jugement():
     nature, date = parse_jugement('{"nature": "Jugement d\'ouverture de liquidation", "date": "2024-03-01"}')
     assert "liquidation" in nature and date == "2024-03-01"

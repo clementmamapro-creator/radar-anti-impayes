@@ -31,7 +31,13 @@ def temporal_split(df: pd.DataFrame, test_years: int) -> tuple[pd.DataFrame, pd.
     if len(years) <= test_years:
         raise ValueError(f"Pas assez d'années d'observation pour un découpage temporel : {years}")
     cut = years[-test_years]
-    return df[df["annee_observation"] < cut], df[df["annee_observation"] >= cut]
+    train_df, test_df = df[df["annee_observation"] < cut], df[df["annee_observation"] >= cut]
+    if test_df["defaillance"].sum() == 0 or len(test_df) < 1000:
+        raise ValueError(
+            f"Jeu de test inutilisable ({len(test_df)} lignes, {int(test_df['defaillance'].sum())} défaillances) : "
+            "vérifier les dates des sources."
+        )
+    return train_df, test_df
 
 
 def recall_at_top(y: np.ndarray, p: np.ndarray, share: float = 0.10) -> float:

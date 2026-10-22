@@ -45,8 +45,12 @@ def build_training_set(bilans: pd.DataFrame, procedures: pd.DataFrame, cfg: Conf
     b["date_observation"] = b["date_cloture"] + lag
     b["fin_horizon"] = b["date_observation"] + horizon
 
-    # Dernière date de données disponible : au-delà, la cible n'est pas encore connue
-    last_known = procedures["date_ouverture"].max() if len(procedures) else b["date_observation"].max()
+    # Dernière date où la cible est connue : la dernière procédure publiée, sans jamais dépasser
+    # aujourd'hui moins un mois (délai de publication au BODACC). Au-delà, une absence de
+    # procédure ne veut rien dire : ces bilans sont exclus.
+    cap = pd.Timestamp.now().normalize() - pd.DateOffset(months=1)
+    last_proc = procedures["date_ouverture"].max() if len(procedures) else cap
+    last_known = min(last_proc, cap)
     b = b[b["fin_horizon"] <= last_known]
 
     first_proc = procedures.groupby("siren")["date_ouverture"].min()

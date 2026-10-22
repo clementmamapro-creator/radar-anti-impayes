@@ -16,6 +16,8 @@ import pandas as pd
 from .config import Config
 
 _SIREN_RE = re.compile(r"\d{9}")
+# Avant 2005, les comptes publiés en open data sont trop rares pour être utiles
+DATE_MIN = pd.Timestamp("2005-01-01")
 
 
 def extract_sirens(registre) -> list[str]:
@@ -62,6 +64,8 @@ def normalize_procedures(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
             rows.append((siren, date.normalize(), nature))
 
     out = pd.DataFrame(rows, columns=["siren", "date_ouverture", "nature"])
+    # Les sources contiennent des dates aberrantes (saisie) : on garde une plage plausible
+    out = out[out["date_ouverture"].between(DATE_MIN, pd.Timestamp.now().normalize())]
     # Première ouverture connue par SIREN et par date
     return out.drop_duplicates(["siren", "date_ouverture"]).reset_index(drop=True)
 
@@ -82,6 +86,7 @@ def normalize_bilans(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
     out["siren"] = out["siren"].astype(str).str.replace(r"\D", "", regex=True).str.zfill(9)
     out["date_cloture"] = pd.to_datetime(out["date_cloture"], errors="coerce")
     out = out.dropna(subset=["date_cloture"])
+    out = out[out["date_cloture"].between(DATE_MIN, pd.Timestamp.now().normalize())]
     for name in feats:
         out[name] = pd.to_numeric(out[name], errors="coerce")
 
