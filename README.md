@@ -1,6 +1,6 @@
 # Acquit · vérifiez un client avant de signer
 
-*Nom de code du dépôt : radar-anti-impayes. Un projet MCF World.*
+*Nom de code du dépôt : radar-anti-impayes. Une marque MCF World.*
 
 **Ce client paiera-t-il ?** Avant d'envoyer un devis, une TPE saisit le SIREN de son client et obtient un risque estimé de défaillance à 12 mois, expliqué en langage clair, à partir des seules données publiques.
 
@@ -110,4 +110,4 @@ Le code est publié sous licence **GNU AGPL-3.0 ou ultérieure** : vous pouvez l
 
 Le nom **Acquit**, le logo et la charte graphique ne sont pas couverts par cette licence et restent la propriété de MCF World. Les données réutilisées (BODACC, INPI) relèvent de la Licence Ouverte de l'État.
 
-Besoin d'aller plus loin (diagnostic de vos encaissements, tableaux de bord, missions data) ? L'accompagnement est proposé par MCF World.
+Besoin d'aller plus loin ? Le diagnostic de vos encaissements est proposé par Acquit ; les tableaux de bord et missions data, par MCF World, le groupe data et IA dont Acquit fait partie.
