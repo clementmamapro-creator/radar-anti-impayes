@@ -38,9 +38,6 @@ RADAR_DEMO=1 python -m radar serve   # site + API sur http://localhost:8000
 
 Ou en une commande : `docker compose up --build`.
 
-```text
-```
-
 Ou avec Docker : `docker build -t radar . && docker run -p 8000:8000 radar`.
 
 ## Passer aux vraies données
