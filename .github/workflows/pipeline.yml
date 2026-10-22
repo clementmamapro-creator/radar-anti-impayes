@@ -49,8 +49,31 @@ jobs:
           python -m radar train 2>&1 | tee reports/4-train.log
           cp models/metrics.json reports/metrics.json
 
+      - name: Résumé des métriques
+        id: summary
+        if: steps.train.outcome == 'success'
+        run: |
+          echo '## Métriques du modèle' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat models/metrics.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Sauvegarder le modèle
+        id: upload
+        uses: actions/upload-artifact@v4
+        if: steps.train.outcome == 'success'
+        with:
+          name: modele-et-base
+          path: |
+            models/
+            data/radar.duckdb
+          retention-days: 30
+
       - name: Publier les journaux sur la branche pipeline-results
+        # En dernier, dans un dossier séparé : ne touche pas au dossier de travail
         if: always()
+        env:
+          TOKEN: ${{ github.token }}
         run: |
           {
             echo "run: ${GITHUB_RUN_ID}"
@@ -60,34 +83,16 @@ jobs:
             echo "ingest: ${{ steps.ingest.outcome }}"
             echo "build: ${{ steps.build.outcome }}"
             echo "train: ${{ steps.train.outcome }}"
+            echo "summary: ${{ steps.summary.outcome }}"
+            echo "upload: ${{ steps.upload.outcome }}"
             df -h / | tail -1
             free -m | sed -n 2p
           } > reports/0-status.txt
-          cp -r reports /tmp/reports
+          mkdir -p /tmp/results && cp -r reports/. /tmp/results/
+          cd /tmp/results
+          git init -q -b pipeline-results
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin pipeline-results || true
-          git checkout -B pipeline-results
-          git rm -r -q --cached . > /dev/null
-          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
-          cp -r /tmp/reports/. .
           git add -A
           git commit -q -m "Résultats du run ${GITHUB_RUN_ID}"
-          git push -f origin pipeline-results
-
-      - name: Résumé des métriques
-        if: steps.train.outcome == 'success'
-        run: |
-          echo '## Métriques du modèle' >> "$GITHUB_STEP_SUMMARY"
-          echo '```json' >> "$GITHUB_STEP_SUMMARY"
-          cat models/metrics.json >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-
-      - uses: actions/upload-artifact@v4
-        if: steps.train.outcome == 'success'
-        with:
-          name: modele-et-base
-          path: |
-            models/
-            data/radar.duckdb
-          retention-days: 30
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pipeline-results
