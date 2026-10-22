@@ -8,12 +8,13 @@ from functools import lru_cache
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from . import __version__
 from .config import load_config
 from .scoring import Scorer
-from .transform import load_tables
+from .store import DuckDBStore
 
 WEB_DIR = Path(__file__).parent / "web"
 
@@ -23,13 +24,18 @@ app = FastAPI(
     description="Score de risque de défaillance d'une entreprise à partir des données publiques.",
 )
 
+# Le site vitrine peut être hébergé ailleurs que l'API (ex. Cloudflare Pages) :
+# lister ses domaines dans RADAR_CORS_ORIGINS, séparés par des virgules.
+_origins = [o.strip() for o in os.getenv("RADAR_CORS_ORIGINS", "").split(",") if o.strip()]
+if _origins:
+    app.add_middleware(CORSMiddleware, allow_origins=_origins, allow_methods=["GET"], allow_headers=["*"])
+
 
 @lru_cache
 def get_scorer() -> Scorer:
     cfg = load_config()
-    procedures, bilans = load_tables(cfg)
     with_identity = os.getenv("RADAR_IDENTITY", "1") == "1"
-    return Scorer(cfg, bilans, procedures, with_identity=with_identity)
+    return Scorer(cfg, DuckDBStore(cfg.db_path), with_identity=with_identity)
 
 
 def is_demo() -> bool:
@@ -52,18 +58,10 @@ def exemples() -> list[dict]:
     """SIREN d'exemple pour la démonstration (uniquement en mode démo)."""
     if not is_demo():
         return []
-    s = get_scorer()
-    proc = set(s.procedures["siren"])
-    last = s.bilans.sort_values("date_cloture").groupby("siren").tail(1)
-    healthy = last[~last["siren"].isin(proc)]
-    picks = []
     # Un exemple sain, un fragile, un en procédure
-    best = healthy.sort_values("taux_endettement").iloc[0]["siren"]
-    worst = healthy.sort_values("taux_endettement").iloc[-1]["siren"]
-    picks += [{"siren": best, "label": "Exemple 1"}, {"siren": worst, "label": "Exemple 2"}]
-    if proc:
-        picks.append({"siren": sorted(proc)[0], "label": "Exemple 3"})
-    return picks
+    samples = get_scorer().store.sample_sirens()
+    sirens = samples["sain"] + samples["fragile"] + samples["procedure"]
+    return [{"siren": s, "label": f"Exemple {i}"} for i, s in enumerate(sirens, start=1)]
 
 
 @app.get("/score/{siren}")

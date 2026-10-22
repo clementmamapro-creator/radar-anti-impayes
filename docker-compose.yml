@@ -1,0 +1,22 @@
+# Lancement local en une commande : docker compose up --build
+# puis ouvrir http://localhost:8000
+#
+# Par défaut, l'image génère des données FICTIVES et entraîne le modèle au build.
+# Pour les données réelles : passez DEMO à "0", lancez d'abord
+#   python -m radar ingest && python -m radar build && python -m radar train
+# sur votre machine, puis décommentez les volumes ci-dessous.
+
+services:
+  api:
+    build:
+      context: .
+      args:
+        DEMO: "1"
+    ports:
+      - "8000:8000"
+    environment:
+      RADAR_IDENTITY: "1"   # nom de l'entreprise via l'API Recherche d'entreprises
+    # volumes:
+    #   - ./data:/app/data:ro
+    #   - ./models:/app/models:ro
+    restart: unless-stopped

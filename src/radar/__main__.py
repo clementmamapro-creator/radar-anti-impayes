@@ -69,10 +69,10 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(report["metrics"], indent=2, ensure_ascii=False))
     elif args.cmd == "score":
         from .scoring import Scorer
-        from .transform import load_tables
+        from .store import DuckDBStore
 
-        procedures, bilans = load_tables(cfg)
-        print(json.dumps(Scorer(cfg, bilans, procedures).score(args.siren).to_dict(), indent=2, ensure_ascii=False))
+        scorer = Scorer(cfg, DuckDBStore(cfg.db_path))
+        print(json.dumps(scorer.score(args.siren).to_dict(), indent=2, ensure_ascii=False))
     elif args.cmd == "serve":
         import uvicorn
 

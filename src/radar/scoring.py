@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import asdict, dataclass, field
 from functools import cached_property
 
@@ -13,6 +14,9 @@ import shap
 
 from .config import Config
 from .features import latest_features
+
+# SHAP signale un changement de format de sortie déjà géré dans `explain`
+warnings.filterwarnings("ignore", message="LightGBM binary classifier with TreeExplainer")
 
 LABELS = {
     "chiffre_affaires": "le chiffre d'affaires",
@@ -92,10 +96,16 @@ def fetch_identity(cfg: Config, siren: str, timeout: float = 5.0) -> dict | None
 
 
 class Scorer:
-    def __init__(self, cfg: Config, bilans: pd.DataFrame, procedures: pd.DataFrame, with_identity: bool = True):
+    """Score un SIREN.
+
+    `store` fournit les données d'un SIREN à la fois (voir `radar.store`) :
+    en production, une requête DuckDB ; en test, des DataFrames en mémoire.
+    Rien n'est chargé en entier, pour tenir dans 512 Mo de RAM.
+    """
+
+    def __init__(self, cfg: Config, store, with_identity: bool = True):
         self.cfg = cfg
-        self.bilans = bilans
-        self.procedures = procedures
+        self.store = store
         self.with_identity = with_identity
         bundle = joblib.load(cfg.model_dir / "model.joblib")
         self.calibrated = bundle["calibrated"]
@@ -143,13 +153,14 @@ class Scorer:
 
     def score(self, siren: str) -> Resultat:
         siren = "".join(c for c in siren if c.isdigit()).zfill(9)
-        procs = self.procedures[self.procedures["siren"] == siren].sort_values("date_ouverture")
+        procs = self.store.procedures_for(siren).sort_values("date_ouverture")
         proc_list = [
-            {"date": d.strftime("%Y-%m-%d"), "nature": n} for d, n in zip(procs["date_ouverture"], procs["nature"])
+            {"date": pd.Timestamp(d).strftime("%Y-%m-%d"), "nature": n}
+            for d, n in zip(procs["date_ouverture"], procs["nature"])
         ]
         ident = fetch_identity(self.cfg, siren) if self.with_identity else None
 
-        last = latest_features(self.bilans, siren, self.cfg)
+        last = latest_features(self.store.bilans_for(siren), siren, self.cfg)
         if proc_list and (last is None or pd.Timestamp(proc_list[-1]["date"]) > last["date_cloture"]):
             return Resultat(siren, "procedure_en_cours", niveau="élevé", procedures=proc_list, identite=ident)
         if last is None:

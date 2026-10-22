@@ -76,7 +76,14 @@ def test_entrainement_et_scoring(cfg, built):
     # Le signal simulé doit être retrouvé nettement mieux que le hasard
     assert report["metrics"]["lightgbm"]["roc_auc"] > 0.65
 
-    scorer = Scorer(cfg, bilans, procedures, with_identity=False)
+    from radar.store import DuckDBStore, FrameStore
+
+    # Les deux accès aux données doivent donner le même score
+    by_frame = Scorer(cfg, FrameStore(bilans, procedures), with_identity=False)
+    scorer = Scorer(cfg, DuckDBStore(cfg.db_path), with_identity=False)
+    one = bilans["siren"].iloc[0]
+    assert by_frame.score(one).probabilite == scorer.score(one).probabilite
+    assert set(scorer.store.sample_sirens()) == {"sain", "fragile", "procedure"}
     sain = bilans[~bilans["siren"].isin(procedures["siren"])]["siren"].iloc[0]
     r = scorer.score(sain)
     assert r.statut == "score" and 0 <= r.probabilite <= 1

@@ -105,8 +105,11 @@ def build_tables(cfg: Config, bodacc_path: Path, ratios_path: Path) -> dict[str,
 
     cfg.db_path.parent.mkdir(parents=True, exist_ok=True)
     with duckdb.connect(str(cfg.db_path)) as con:
-        con.execute("CREATE OR REPLACE TABLE procedures AS SELECT * FROM procedures")
-        con.execute("CREATE OR REPLACE TABLE bilans AS SELECT * FROM bilans")
+        # Tri et index par SIREN : l'API lit un SIREN à la fois
+        con.execute("CREATE OR REPLACE TABLE procedures AS SELECT * FROM procedures ORDER BY siren")
+        con.execute("CREATE OR REPLACE TABLE bilans AS SELECT * FROM bilans ORDER BY siren, date_cloture")
+        con.execute("CREATE INDEX idx_procedures_siren ON procedures (siren)")
+        con.execute("CREATE INDEX idx_bilans_siren ON bilans (siren)")
     return {"procedures": len(procedures), "bilans": len(bilans)}
 
 
