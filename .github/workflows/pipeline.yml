@@ -1,0 +1,39 @@
+name: Pipeline données réelles
+
+# Ingestion des données ouvertes + entraînement, chaque lundi ou à la demande.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * 1"
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: Vérifier le schéma des sources
+        run: python -m radar inspect
+      - name: Télécharger BODACC et ratios INPI
+        run: python -m radar ingest
+      - name: Normaliser
+        run: python -m radar build
+      - name: Entraîner et évaluer
+        run: python -m radar train
+      - name: Résumé des métriques
+        run: |
+          echo '## Métriques du modèle' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat models/metrics.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: modele-et-base
+          path: |
+            models/
+            data/radar.duckdb
+          retention-days: 30

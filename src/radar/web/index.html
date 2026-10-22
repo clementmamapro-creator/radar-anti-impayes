@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar client</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #eef1f4;
+    --surface: #ffffff;
+    --ink: #1b2733;
+    --muted: #5a6a7a;
+    --line: #d3dbe3;
+    --accent: #1f4e79;
+    --low: #2e7d5b;
+    --mid: #b7791f;
+    --high: #b23a3a;
+    --focus: #3b82c4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #121a22; --surface: #1a242e; --ink: #e6ecf1; --muted: #9aaab8;
+      --line: #2c3a47; --accent: #8fb8de; --low: #5fbf92; --mid: #e0a84a; --high: #e57373;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Public Sans", system-ui, sans-serif; font-size: 17px; line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+  }
+  main { max-width: 680px; margin: 0 auto; padding: 48px 16px 64px; }
+  header p { margin: 0; color: var(--muted); }
+  .brand { font-weight: 800; font-size: 15px; color: var(--accent); margin-bottom: 28px; }
+  h1 { font-size: clamp(30px, 6vw, 44px); line-height: 1.1; margin: 0 0 12px; font-weight: 800; letter-spacing: -0.02em; }
+  .demo {
+    margin: 24px 0 0; padding: 10px 14px; border-left: 3px solid var(--mid);
+    background: var(--surface); color: var(--ink); font-size: 15px;
+  }
+  form { margin-top: 36px; display: flex; gap: 10px; flex-wrap: wrap; }
+  label { display: block; width: 100%; font-weight: 600; font-size: 15px; }
+  input {
+    flex: 1 1 260px; min-width: 0; width: 100%; font: inherit; font-size: 26px; font-weight: 600; letter-spacing: 0.08em;
+    padding: 12px 16px; border: 2px solid var(--line); border-radius: 6px;
+    background: var(--surface); color: var(--ink);
+  }
+  input:focus-visible, button:focus-visible, .chip:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  button {
+    font: inherit; font-weight: 700; padding: 0 26px; min-height: 58px; border: 0; border-radius: 6px;
+    background: var(--accent); color: var(--surface); cursor: pointer;
+  }
+  .hint { width: 100%; margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+  .examples { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .chip {
+    font: inherit; font-size: 14px; font-weight: 600; min-height: 0; padding: 6px 12px;
+    background: transparent; color: var(--accent); border: 1px solid var(--line); border-radius: 999px;
+  }
+  #result { margin-top: 40px; }
+  .verdict { font-size: clamp(22px, 4.2vw, 28px); font-weight: 700; line-height: 1.3; margin: 0 0 6px; }
+  .who { color: var(--muted); margin: 0 0 24px; }
+
+  /* La règle de risque : l'élément central de la page */
+  .ruler { position: relative; margin: 8px 0 36px; }
+  .track { display: grid; grid-template-columns: 2fr 4fr 14fr; height: 14px; border-radius: 7px; overflow: hidden; }
+  .track span:nth-child(1) { background: var(--low); }
+  .track span:nth-child(2) { background: var(--mid); }
+  .track span:nth-child(3) { background: var(--high); }
+  .marker {
+    position: absolute; top: -9px; width: 4px; height: 32px; margin-left: -2px;
+    background: var(--ink); border-radius: 2px; transition: left 600ms cubic-bezier(.2,.8,.2,1);
+  }
+  .scale { display: grid; grid-template-columns: 2fr 4fr 14fr; font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .scale span:last-child { text-align: left; }
+  .pct { display: none; font-size: 14px; color: var(--muted); margin-top: 8px; }
+  @media (max-width: 520px) {
+    .scale { display: none; }
+    .pct { display: block; }
+    button[type="submit"] { width: 100%; }
+  }
+
+  h2 { font-size: 18px; margin: 32px 0 10px; }
+  ul.factors { list-style: none; padding: 0; margin: 0; }
+  ul.factors li { padding: 12px 0; border-top: 1px solid var(--line); display: flex; gap: 12px; }
+  ul.factors li:last-child { border-bottom: 1px solid var(--line); }
+  .dir { flex: 0 0 auto; width: 22px; font-weight: 800; text-align: center; }
+  .up { color: var(--high); } .down { color: var(--low); }
+  .proc { margin: 0; padding-left: 20px; }
+  .note { margin-top: 32px; font-size: 14px; color: var(--muted); }
+  .error { color: var(--high); font-weight: 600; }
+  footer { margin-top: 56px; font-size: 14px; color: var(--muted); }
+  footer a { color: var(--accent); }
+  @media (prefers-reduced-motion: reduce) { .marker { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="brand">Radar client</div>
+    <h1>Ce client paiera-t-il ?</h1>
+    <p>Avant d'envoyer un devis, vérifiez le risque de défaillance d'une entreprise à partir de ses comptes publics et des annonces légales.</p>
+    <p class="demo" id="demo" hidden>Mode démonstration : les entreprises et les scores affichés sont fictifs.</p>
+  </header>
+
+  <form id="form">
+    <label for="siren">Numéro SIREN de l'entreprise</label>
+    <input id="siren" name="siren" inputmode="numeric" autocomplete="off" placeholder="123 456 789" maxlength="11" required>
+    <button type="submit">Vérifier ce client</button>
+    <p class="hint">9 chiffres, visibles sur ses factures, son Kbis ou son site.</p>
+  </form>
+  <div class="examples" id="examples"></div>
+
+  <section id="result" aria-live="polite"></section>
+
+  <footer>
+    Sources : BODACC (DILA), comptes annuels INPI. <a href="/model">Voir les performances du modèle</a> · <a href="/docs">API</a>
+  </footer>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const input = $("#siren");
+const result = $("#result");
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtSiren = (d) => d.replace(/\D/g, "").slice(0, 9).replace(/(\d{3})(?=\d)/g, "$1 ");
+
+input.addEventListener("input", () => { input.value = fmtSiren(input.value); });
+
+// Position du marqueur : les zones ont des largeurs 2/4/14 sur 20, alignées sur les seuils 2 % et 6 %
+function markerLeft(p) {
+  if (p < 0.02) return (p / 0.02) * 10;
+  if (p < 0.06) return 10 + ((p - 0.02) / 0.04) * 20;
+  return 30 + Math.min(1, (p - 0.06) / 0.34) * 70;
+}
+
+const VERDICT = {
+  "faible": "Risque faible : rien d'inquiétant dans les comptes publiés.",
+  "modéré": "Risque modéré : demandez un acompte ou des délais de paiement courts.",
+  "élevé": "Risque élevé : sécurisez le paiement avant de vous engager.",
+};
+
+function render(r) {
+  const name = r.identite?.nom ? `${esc(r.identite.nom)} · SIREN ${fmtSiren(r.siren)}` : `SIREN ${fmtSiren(r.siren)}`;
+  if (r.statut === "procedure_en_cours") {
+    result.innerHTML = `
+      <p class="verdict">Une procédure collective est en cours pour cette entreprise.</p>
+      <p class="who">${name}</p>
+      ${procs(r)}
+      <p class="note">${esc(r.avertissement)}</p>`;
+    return;
+  }
+  if (r.statut === "donnees_insuffisantes") {
+    result.innerHTML = `
+      <p class="verdict">Pas assez de données publiques pour estimer le risque.</p>
+      <p class="who">${name}</p>
+      <p>Cette entreprise ne publie pas ses comptes (fréquent pour les micro-entreprises) ou ils sont confidentiels. Demandez un acompte et vérifiez son ancienneté.</p>
+      ${procs(r)}`;
+    return;
+  }
+  const pct = (r.probabilite * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+  const factors = r.facteurs.map((f) => `
+      <li><span class="dir ${f.effet === "augmente" ? "up" : "down"}" aria-hidden="true">${f.effet === "augmente" ? "+" : "−"}</span>
+      <span>${esc(f.phrase)}</span></li>`).join("");
+  result.innerHTML = `
+    <p class="verdict">${VERDICT[r.niveau]}</p>
+    <p class="who">${name} · comptes clos le ${new Date(r.date_dernier_bilan).toLocaleDateString("fr-FR")}</p>
+    <div class="ruler" role="img" aria-label="Probabilité estimée de défaillance à 12 mois : ${pct} %">
+      <div class="track"><span></span><span></span><span></span></div>
+      <div class="marker" style="left:0%"></div>
+      <div class="scale"><span>Faible</span><span>Modéré</span><span>Élevé · ${pct} % à 12 mois</span></div>
+      <p class="pct">Probabilité estimée de défaillance à 12 mois : ${pct} %</p>
+    </div>
+    <h2>Ce qui pèse le plus dans ce score</h2>
+    <ul class="factors">${factors}</ul>
+    ${procs(r)}
+    <p class="note">${esc(r.avertissement)}</p>`;
+  requestAnimationFrame(() => { $(".marker").style.left = markerLeft(r.probabilite) + "%"; });
+}
+
+function procs(r) {
+  if (!r.procedures?.length) return "";
+  return `<h2>Annonces au BODACC</h2><ul class="proc">${r.procedures.map((p) =>
+    `<li>${new Date(p.date).toLocaleDateString("fr-FR")} : ${esc(p.nature)}</li>`).join("")}</ul>`;
+}
+
+async function check(siren) {
+  result.innerHTML = `<p class="who">Vérification en cours…</p>`;
+  try {
+    const res = await fetch(`/score/${siren.replace(/\D/g, "")}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "La vérification a échoué.");
+    render(data);
+  } catch (e) {
+    result.innerHTML = `<p class="error">${esc(e.message)}</p>`;
+  }
+}
+
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); check(input.value); });
+
+(async () => {
+  try {
+    const h = await (await fetch("/health")).json();
+    if (h.demo) {
+      $("#demo").hidden = false;
+      const ex = await (await fetch("/exemples")).json();
+      $("#examples").innerHTML = ex.map((x) => `<button class="chip" type="button" data-s="${x.siren}">${esc(x.label)}</button>`).join("");
+      document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => {
+        input.value = fmtSiren(b.dataset.s); check(b.dataset.s);
+      }));
+    }
+  } catch { /* l'interface reste utilisable sans ces informations */ }
+})();
+</script>
+</body>
+</html>

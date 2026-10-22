@@ -1,0 +1,169 @@
+"""Scoring d'un SIREN et explication en langage clair."""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field
+from functools import cached_property
+
+import httpx
+import joblib
+import numpy as np
+import pandas as pd
+import shap
+
+from .config import Config
+from .features import latest_features
+
+LABELS = {
+    "chiffre_affaires": "le chiffre d'affaires",
+    "marge_ebe": "la marge d'exploitation (EBE)",
+    "resultat_net": "le résultat net",
+    "taux_endettement": "le taux d'endettement",
+    "ratio_liquidite": "la liquidité (capacité à payer à court terme)",
+    "autonomie_financiere": "l'autonomie financière",
+    "caf_sur_ca": "la capacité d'autofinancement",
+    "capacite_remboursement": "la capacité de remboursement de la dette",
+    "couverture_interets": "la couverture des intérêts",
+    "credit_clients_jours": "le délai de paiement de ses propres clients",
+    "credit_fournisseurs_jours": "le délai de paiement de ses fournisseurs",
+    "poids_bfr_sur_ca": "le besoin en fonds de roulement",
+    "evolution_ca": "l'évolution du chiffre d'affaires",
+    "nb_bilans": "l'ancienneté des comptes publiés",
+}
+
+DISCLAIMER = (
+    "Risque estimé à partir des données publiques (comptes déposés, BODACC). "
+    "Ce score est une aide à la décision, pas un jugement sur l'entreprise."
+)
+
+
+@dataclass
+class Facteur:
+    variable: str
+    libelle: str
+    valeur: float | None
+    effet: str  # "augmente" ou "réduit" le risque
+    poids: float
+    position: str | None = None  # "au-dessus" ou "en dessous" de la médiane, None si inconnue
+    phrase: str = ""
+
+
+@dataclass
+class Resultat:
+    siren: str
+    statut: str  # "score", "procedure_en_cours", "donnees_insuffisantes"
+    probabilite: float | None = None
+    niveau: str | None = None
+    date_dernier_bilan: str | None = None
+    facteurs: list[Facteur] = field(default_factory=list)
+    procedures: list[dict] = field(default_factory=list)
+    identite: dict | None = None
+    avertissement: str = DISCLAIMER
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def level_for(p: float, levels: dict) -> str:
+    if p < levels["faible"]:
+        return "faible"
+    if p < levels["modere"]:
+        return "modéré"
+    return "élevé"
+
+
+def fetch_identity(cfg: Config, siren: str, timeout: float = 5.0) -> dict | None:
+    """Nom, activité et date de création via l'API Recherche d'entreprises (facultatif)."""
+    try:
+        r = httpx.get(f"{cfg.entreprises['base_url']}/search", params={"q": siren, "per_page": 1}, timeout=timeout)
+        r.raise_for_status()
+        res = r.json().get("results") or []
+    except (httpx.HTTPError, ValueError):
+        return None
+    if not res or res[0].get("siren") != siren:
+        return None
+    e = res[0]
+    return {
+        "nom": e.get("nom_raison_sociale") or e.get("nom_complet"),
+        "activite": e.get("activite_principale"),
+        "date_creation": e.get("date_creation"),
+        "etat": e.get("etat_administratif"),
+    }
+
+
+class Scorer:
+    def __init__(self, cfg: Config, bilans: pd.DataFrame, procedures: pd.DataFrame, with_identity: bool = True):
+        self.cfg = cfg
+        self.bilans = bilans
+        self.procedures = procedures
+        self.with_identity = with_identity
+        bundle = joblib.load(cfg.model_dir / "model.joblib")
+        self.calibrated = bundle["calibrated"]
+        self.booster = bundle["booster"]
+        self.features = bundle["features"]
+        self.levels = bundle["levels"]
+        self.medians = bundle.get("medians", {})
+
+    @cached_property
+    def explainer(self) -> shap.TreeExplainer:
+        return shap.TreeExplainer(self.booster)
+
+    def explain(self, x: pd.DataFrame, top: int = 3) -> list[Facteur]:
+        values = self.explainer.shap_values(x)
+        if isinstance(values, list):  # anciennes versions : une matrice par classe
+            values = values[1]
+        contrib = np.asarray(values)[0]
+        order = np.argsort(-np.abs(contrib))[:top]
+        out = []
+        for i in order:
+            name = self.features[i]
+            v = x.iloc[0, i]
+            label = LABELS.get(name, name)
+            effet = "augmente" if contrib[i] > 0 else "réduit"
+            med = self.medians.get(name)
+            if pd.isna(v):
+                position = None
+                phrase = f"{label[0].upper()}{label[1:]} : non publié, ce qui {effet} le risque."
+            else:
+                position = "au-dessus" if med is None or v >= med else "en dessous"
+                phrase = (
+                    f"{label[0].upper()}{label[1:]} : {position} de la médiane des entreprises, "
+                    f"ce qui {effet} le risque."
+                )
+            out.append(Facteur(
+                variable=name,
+                libelle=label,
+                valeur=None if pd.isna(v) else round(float(v), 4),
+                effet=effet,
+                poids=round(float(contrib[i]), 4),
+                position=position,
+                phrase=phrase,
+            ))
+        return out
+
+    def score(self, siren: str) -> Resultat:
+        siren = "".join(c for c in siren if c.isdigit()).zfill(9)
+        procs = self.procedures[self.procedures["siren"] == siren].sort_values("date_ouverture")
+        proc_list = [
+            {"date": d.strftime("%Y-%m-%d"), "nature": n} for d, n in zip(procs["date_ouverture"], procs["nature"])
+        ]
+        ident = fetch_identity(self.cfg, siren) if self.with_identity else None
+
+        last = latest_features(self.bilans, siren, self.cfg)
+        if proc_list and (last is None or pd.Timestamp(proc_list[-1]["date"]) > last["date_cloture"]):
+            return Resultat(siren, "procedure_en_cours", niveau="élevé", procedures=proc_list, identite=ident)
+        if last is None:
+            return Resultat(siren, "donnees_insuffisantes", procedures=proc_list, identite=ident)
+
+        x = pd.DataFrame([last[self.features].astype(float).to_numpy()], columns=self.features)
+        p = float(self.calibrated.predict_proba(x)[0, 1])
+        return Resultat(
+            siren=siren,
+            statut="score",
+            probabilite=round(p, 4),
+            niveau=level_for(p, self.levels),
+            date_dernier_bilan=last["date_cloture"].strftime("%Y-%m-%d"),
+            facteurs=self.explain(x),
+            procedures=proc_list,
+            identite=ident,
+        )

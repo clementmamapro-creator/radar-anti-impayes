@@ -1,0 +1,69 @@
+# Configuration du Radar anti-impayés (phase 1 : radar client)
+#
+# Les noms de colonnes des jeux open data ne sont pas documentés de façon stable.
+# Lancez `python -m radar inspect` au premier démarrage : la commande affiche les
+# vraies colonnes et signale celles du mapping ci-dessous qui sont introuvables.
+
+paths:
+  raw_dir: data/raw
+  db: data/radar.duckdb
+  model_dir: models
+
+sources:
+  bodacc:
+    # Annonces commerciales du BODACC (DILA), plateforme Opendatasoft
+    base_url: https://bodacc-datadila.opendatasoft.com/api/explore/v2.1
+    dataset: annonces-commerciales
+    # On ne télécharge que les procédures collectives
+    where: "familleavis='collective'"
+    columns:
+      registre: registre          # SIREN (parfois "123 456 789", parfois liste)
+      date_parution: dateparution
+      famille: familleavis_lib
+      jugement: jugement          # JSON texte : nature et date du jugement
+  ratios:
+    # Ratios financiers BCE / INPI (DGE), plateforme Opendatasoft
+    base_url: https://data.economie.gouv.fr/api/explore/v2.1
+    dataset: ratios_inpi_bce
+    columns:
+      siren: siren
+      date_cloture: date_cloture_exercice
+      type_bilan: type_bilan
+    # Ratios utilisés comme variables explicatives (renommés côté modèle)
+    features:
+      chiffre_affaires: chiffre_d_affaires
+      marge_ebe: marge_ebe
+      resultat_net: resultat_net
+      taux_endettement: taux_d_endettement
+      ratio_liquidite: ratio_de_liquidite
+      autonomie_financiere: autonomie_financiere
+      caf_sur_ca: caf_sur_ca
+      capacite_remboursement: capacite_de_remboursement
+      couverture_interets: couverture_des_interets
+      credit_clients_jours: credit_clients_jours
+      credit_fournisseurs_jours: credit_fournisseurs_jours
+      poids_bfr_sur_ca: poids_bfr_exploitation_sur_ca
+  entreprises:
+    # API Recherche d'entreprises (identité, utilisée au moment du scoring)
+    base_url: https://recherche-entreprises.api.gouv.fr
+
+target:
+  # Délai entre la clôture des comptes et le moment où ils sont réellement
+  # disponibles (dépôt au greffe). Les variables ne sont utilisées qu'à partir
+  # de cette date d'observation, pour éviter toute fuite d'information.
+  observation_lag_months: 7
+  # Horizon de prédiction : procédure collective ouverte dans les N mois
+  horizon_months: 12
+  # Mots-clés identifiant un jugement d'ouverture de procédure
+  opening_keywords: ["ouverture", "redressement", "liquidation", "sauvegarde"]
+
+model:
+  # Découpage temporel : on entraîne sur les années d'observation passées
+  # et on teste sur la ou les années suivantes.
+  test_years: 1
+  random_state: 42
+  # Seuils de niveau de risque appliqués à la probabilité calibrée
+  levels:
+    faible: 0.02
+    modere: 0.06
+    eleve: 1.0
