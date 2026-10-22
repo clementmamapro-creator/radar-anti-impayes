@@ -103,3 +103,11 @@ tests/           tests de bout en bout (sans réseau)
 ---
 
 Projet de Clément Ferry MAMA (MCL World). Sources : BODACC (DILA), comptes annuels (INPI), API Recherche d'entreprises.
+
+## Licence
+
+Le code est publié sous licence **GNU AGPL-3.0 ou ultérieure** : vous pouvez l'utiliser, l'étudier, le modifier et le redistribuer librement. Si vous le proposez comme service en ligne, vous devez publier vos modifications sous la même licence.
+
+Le nom **Acquit**, le logo et la charte graphique ne sont pas couverts par cette licence et restent la propriété de MCF World. Les données réutilisées (BODACC, INPI) relèvent de la Licence Ouverte de l'État.
+
+Besoin d'aller plus loin (diagnostic de vos encaissements, tableaux de bord, missions data) ? L'accompagnement est proposé par MCF World.

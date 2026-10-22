@@ -3,6 +3,8 @@ name = "radar-anti-impayes"
 version = "0.1.0"
 description = "Score de risque de défaillance d'une entreprise à partir des données ouvertes (BODACC, INPI)."
 requires-python = ">=3.11"
+license = "AGPL-3.0-or-later"
+authors = [{ name = "Clément Ferry MAMA (MCF World)" }]
 dependencies = [
   "pandas>=2.2",
   "pyarrow>=15",
