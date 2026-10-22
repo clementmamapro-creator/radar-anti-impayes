@@ -40,6 +40,35 @@ DISCLAIMER = (
     "Ce score est une aide à la décision, pas un jugement sur l'entreprise."
 )
 
+RAPPEL_LEGAL = (
+    "Entre professionnels, le délai de paiement ne peut dépasser 60 jours après l'émission "
+    "de la facture, ou 45 jours fin de mois."
+)
+
+# Recommandation de conditions de paiement par situation (version 1, à valider avec des artisans)
+RECOMMANDATIONS = {
+    "faible": {
+        "titre": "Conditions habituelles",
+        "texte": "Rien d'inquiétant dans les comptes publiés. Un paiement à 30 jours est raisonnable.",
+    },
+    "modéré": {
+        "titre": "Demandez un acompte",
+        "texte": "Demandez un acompte d'environ 30 % à la signature et un paiement du solde à 15 jours.",
+    },
+    "élevé": {
+        "titre": "Sécurisez le paiement",
+        "texte": "Demandez 50 % à la commande et le solde à la livraison, avant toute avance de matériel.",
+    },
+    "procedure_en_cours": {
+        "titre": "N'accordez pas de délai",
+        "texte": "Une procédure collective est en cours : exigez le paiement intégral avant de commencer.",
+    },
+    "donnees_insuffisantes": {
+        "titre": "Restez prudent",
+        "texte": "Cette entreprise ne publie pas ses comptes. Un acompte reste prudent, surtout si elle est récente.",
+    },
+}
+
 
 @dataclass
 class Facteur:
@@ -62,7 +91,14 @@ class Resultat:
     facteurs: list[Facteur] = field(default_factory=list)
     procedures: list[dict] = field(default_factory=list)
     identite: dict | None = None
+    recommandation: dict | None = None
+    rappel_legal: str = RAPPEL_LEGAL
     avertissement: str = DISCLAIMER
+
+    def __post_init__(self) -> None:
+        if self.recommandation is None:
+            key = self.niveau if self.statut == "score" else self.statut
+            self.recommandation = RECOMMANDATIONS.get(key)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -74,6 +110,30 @@ def level_for(p: float, levels: dict) -> str:
     if p < levels["modere"]:
         return "modéré"
     return "élevé"
+
+
+def search_companies(cfg: Config, query: str, limit: int = 6, timeout: float = 5.0) -> list[dict]:
+    """Suggestions d'entreprises par nom (API Recherche d'entreprises). Liste vide en cas d'échec."""
+    try:
+        r = httpx.get(
+            f"{cfg.entreprises['base_url']}/search",
+            params={"q": query, "per_page": limit, "etat_administratif": "A"},
+            timeout=timeout,
+        )
+        r.raise_for_status()
+        results = r.json().get("results") or []
+    except (httpx.HTTPError, ValueError):
+        return []
+    out = []
+    for e in results:
+        siege = e.get("siege") or {}
+        out.append({
+            "siren": e.get("siren"),
+            "nom": e.get("nom_raison_sociale") or e.get("nom_complet"),
+            "ville": siege.get("libelle_commune"),
+            "code_postal": siege.get("code_postal"),
+        })
+    return [x for x in out if x["siren"]]
 
 
 def fetch_identity(cfg: Config, siren: str, timeout: float = 5.0) -> dict | None:

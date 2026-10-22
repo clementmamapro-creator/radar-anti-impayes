@@ -1,4 +1,6 @@
-# Radar anti-impayés · phase 1 : radar client
+# Acquit · vérifiez un client avant de signer
+
+*Nom de code du dépôt : radar-anti-impayes. Un projet MCF World.*
 
 **Ce client paiera-t-il ?** Avant d'envoyer un devis, une TPE saisit le SIREN de son client et obtient un risque estimé de défaillance à 12 mois, expliqué en langage clair, à partir des seules données publiques.
 
@@ -31,7 +33,12 @@ pip install -e ".[dev]"
 python -m radar demo     # génère des entreprises FICTIVES au format des vraies sources
 python -m radar build
 python -m radar train
-RADAR_DEMO=1 python -m radar serve   # http://localhost:8000
+RADAR_DEMO=1 python -m radar serve   # site + API sur http://localhost:8000
+```
+
+Ou en une commande : `docker compose up --build`.
+
+```text
 ```
 
 Ou avec Docker : `docker build -t radar . && docker run -p 8000:8000 radar`.

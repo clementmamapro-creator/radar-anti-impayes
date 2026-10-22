@@ -8,6 +8,7 @@ WORKDIR /app
 COPY pyproject.toml config.yaml ./
 COPY src ./src
 RUN pip install --no-cache-dir .
+COPY site ./site
 
 # Par défaut : mode démo (données fictives générées et modèle entraîné au build).
 # Pour les données réelles, montez data/ et models/ produits par `radar ingest/build/train`.

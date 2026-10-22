@@ -7,21 +7,22 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from . import __version__
-from .config import load_config
-from .scoring import Scorer
+from .config import ROOT, load_config
+from .scoring import Scorer, search_companies
 from .store import DuckDBStore
 
-WEB_DIR = Path(__file__).parent / "web"
+SITE_DIR = Path(os.getenv("RADAR_SITE_DIR", ROOT / "site"))
 
 app = FastAPI(
-    title="Radar anti-impayés",
+    title="Acquit API",
     version=__version__,
-    description="Score de risque de défaillance d'une entreprise à partir des données publiques.",
+    description="Risque de défaillance d'une entreprise et conditions de paiement recommandées, "
+    "à partir des données publiques.",
 )
 
 # Le site vitrine peut être hébergé ailleurs que l'API (ex. Cloudflare Pages) :
@@ -64,6 +65,14 @@ def exemples() -> list[dict]:
     return [{"siren": s, "label": f"Exemple {i}"} for i, s in enumerate(sirens, start=1)]
 
 
+@app.get("/recherche")
+def recherche(q: str = Query(min_length=2, max_length=100)) -> list[dict]:
+    """Suggestions d'entreprises par nom, pour retrouver un SIREN."""
+    if is_demo():
+        return []  # les entreprises de démonstration sont fictives : pas de recherche réelle
+    return search_companies(load_config(), q)
+
+
 @app.get("/score/{siren}")
 def score(siren: str) -> dict:
     digits = "".join(c for c in siren if c.isdigit())
@@ -81,6 +90,7 @@ def model_info() -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-@app.get("/")
-def index() -> FileResponse:
-    return FileResponse(WEB_DIR / "index.html")
+# Le site vitrine, servi par la même application tant qu'il n'est pas hébergé à part.
+# Monté en dernier pour ne pas masquer les routes de l'API.
+if SITE_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=SITE_DIR, html=True), name="site")

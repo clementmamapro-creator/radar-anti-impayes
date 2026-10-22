@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acquit · Vérifiez un client avant de signer</title>
+<meta name="description" content="Avant d'envoyer un devis, vérifiez votre futur client et sachez s'il faut demander un acompte. Gratuit, à partir des comptes publics et des annonces légales.">
+<link rel="icon" href="assets/acquit-tampon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/acquit.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="demo" id="demo" hidden><div class="wrap">Version de démonstration : les entreprises et les résultats affichés sont fictifs.</div></div>
+
+<header class="entete">
+  <div class="wrap">
+    <a class="marque" href="./" aria-label="Acquit, accueil">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M21.5 33.5 L28.5 40.5 L43 25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"/></svg>
+      <span>Acquit</span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="#fonctionnement">Comment ça marche</a>
+      <a href="#methode">Méthode</a>
+      <a href="#tarifs">Tarifs</a>
+      <a href="a-propos.html">À propos</a>
+      <a class="btn btn-principal" href="#verifier">Vérifier un client</a>
+    </nav>
+    <a class="nav-court" href="#verifier">Vérifier un client</a>
+  </div>
+</header>
+
+<main id="contenu">
+  <section class="accueil" id="verifier">
+    <div class="wrap">
+      <div>
+        <h1>Avant de signer, sachez quelles conditions de paiement exiger.</h1>
+        <p class="chapeau">Acquit lit les comptes publics et les annonces légales de votre futur client, puis vous dit s'il faut demander un acompte. Gratuit, sans inscription.</p>
+
+        <form class="verif" id="form" autocomplete="off" novalidate>
+          <label for="q">Numéro SIREN ou nom de l'entreprise</label>
+          <div class="ligne">
+            <input id="q" name="q" type="text" inputmode="text" placeholder="123 456 789 ou nom" aria-autocomplete="list" aria-controls="suggestions" aria-describedby="aide" required>
+            <button class="btn btn-principal" type="submit" id="bouton">Vérifier ce client</button>
+            <ul class="suggestions" id="suggestions" role="listbox" hidden></ul>
+          </div>
+          <p class="aide" id="aide">Le SIREN figure sur les factures, devis et Kbis de votre client.</p>
+          <div class="exemples" id="exemples"></div>
+        </form>
+      </div>
+
+      <article class="fiche" id="fiche" aria-live="polite" aria-label="Résultat de la vérification">
+        <!-- Rempli par assets/app.js ; contenu d'exemple affiché par défaut -->
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="fonctionnement">
+    <div class="wrap">
+      <h2>Un impayé se prévient avant le devis, pas après la facture.</h2>
+      <p class="intro">Acquit vous accompagne aux trois moments où se joue le paiement.</p>
+      <ol class="moments">
+        <li>
+          <h3>Avant le devis</h3>
+          <p>Vérifiez votre client en quelques secondes et recevez les conditions de paiement à exiger : paiement à 30 jours, acompte, ou paiement à la commande.</p>
+          <span class="statut statut-dispo">Disponible</span>
+        </li>
+        <li>
+          <h3>Pendant le chantier</h3>
+          <p>Suivez vos factures, repérez celles qui risquent d'être payées en retard et voyez venir votre trésorerie sur trois mois.</p>
+          <span class="statut statut-bientot">En préparation</span>
+        </li>
+        <li>
+          <h3>Après l'échéance</h3>
+          <p>Relancez avec des courriers prêts à envoyer, du plus cordial à la mise en demeure, et connaissez vos recours.</p>
+          <span class="statut statut-bientot">En préparation</span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="methode">
+    <div class="wrap">
+      <h2>Une méthode que vous pouvez vérifier.</h2>
+      <p class="intro">Acquit n'invente rien : chaque résultat s'appuie sur des données publiques officielles et s'accompagne de ses raisons.</p>
+      <div class="methode">
+        <div>
+          <h3>Des sources officielles</h3>
+          <p>Les comptes annuels déposés au greffe (INPI) et les procédures collectives publiées au BODACC. Les données sont mises à jour chaque semaine.</p>
+        </div>
+        <div>
+          <h3>Un résultat qui s'explique</h3>
+          <p>Un modèle statistique, entraîné sur l'historique des défaillances, estime le risque à 12 mois. Vous voyez les trois éléments qui pèsent le plus, en clair.</p>
+        </div>
+        <div>
+          <h3>Des limites assumées</h3>
+          <p>Quand une entreprise ne publie pas ses comptes, Acquit le dit au lieu d'inventer un score. Le résultat est une aide à la décision, jamais un jugement sur l'entreprise.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="tarifs">
+    <div class="wrap">
+      <h2>Vérifier un client reste gratuit.</h2>
+      <div class="tarifs">
+        <div class="tarif">
+          <h3>Vérification</h3>
+          <p class="prix">Gratuit</p>
+          <ul>
+            <li>Niveau de risque estimé et conditions de paiement recommandées</li>
+            <li>Annonces légales de procédure collective</li>
+            <li>Sans inscription</li>
+          </ul>
+        </div>
+        <div class="tarif">
+          <h3>Suivi et relances</h3>
+          <p class="prix">En préparation</p>
+          <ul>
+            <li>Suivi de vos factures et des retards probables</li>
+            <li>Prévision de trésorerie à 30, 60 et 90 jours</li>
+            <li>Courriers de relance prêts à envoyer</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="questions">
+    <div class="wrap">
+      <h2>Questions fréquentes</h2>
+      <div class="faq">
+        <details>
+          <summary>D'où viennent les informations ?</summary>
+          <p>Des comptes annuels déposés au greffe et diffusés par l'INPI, et des annonces de procédures collectives publiées au BODACC par la DILA. Ce sont des données publiques, sous Licence Ouverte.</p>
+        </details>
+        <details>
+          <summary>Le résultat est-il fiable ?</summary>
+          <p>C'est une estimation statistique : elle repère les situations à risque, mais ne prédit pas l'avenir avec certitude. Les comptes publiés peuvent dater de plus d'un an. Utilisez-la comme un signal pour fixer vos conditions de paiement, pas comme un verdict.</p>
+        </details>
+        <details>
+          <summary>Mon client est une micro-entreprise : comment faire ?</summary>
+          <p>Les micro-entreprises publient rarement des comptes. Acquit vous l'indique et vérifie quand même les annonces légales. Dans ce cas, un acompte reste la meilleure protection.</p>
+        </details>
+        <details>
+          <summary>Que deviennent mes recherches ?</summary>
+          <p>Acquit ne vous demande aucune information personnelle et ne revend aucune donnée. Le détail figure dans la politique de confidentialité.</p>
+        </details>
+        <details>
+          <summary>Puis-je imposer un acompte à un client professionnel ?</summary>
+          <p>Oui, les conditions de paiement se négocient librement entre professionnels et s'écrivent dans le devis. Le délai de paiement, lui, ne peut dépasser 60 jours après l'émission de la facture, ou 45 jours fin de mois.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <div class="wrap">
+    <div>
+      <a class="marque" href="./" aria-label="Acquit, accueil">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M21.5 33.5 L28.5 40.5 L43 25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"/></svg>
+        <span>Acquit</span>
+      </a>
+      <p class="endos">Un projet MCF World. Données : INPI et BODACC (DILA), sous Licence Ouverte.</p>
+    </div>
+    <nav aria-label="Liens de pied de page">
+      <a href="a-propos.html">À propos</a>
+      <a href="mentions-legales.html">Mentions légales</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="https://github.com/clementmamapro-creator/radar-anti-impayes">Code source</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

@@ -89,6 +89,12 @@ def test_entrainement_et_scoring(cfg, built):
     assert r.statut == "score" and 0 <= r.probabilite <= 1
     assert r.niveau in {"faible", "modéré", "élevé"} and len(r.facteurs) == 3
 
+    # Chaque résultat porte une recommandation de conditions de paiement
+    assert r.recommandation and r.recommandation["titre"]
+
     en_procedure = procedures["siren"].iloc[0]
-    assert scorer.score(en_procedure).statut == "procedure_en_cours"
-    assert scorer.score("000000001").statut == "donnees_insuffisantes"
+    proc = scorer.score(en_procedure)
+    assert proc.statut == "procedure_en_cours"
+    assert proc.recommandation["titre"] == "N'accordez pas de délai"
+    vide = scorer.score("000000001")
+    assert vide.statut == "donnees_insuffisantes" and vide.recommandation is not None
