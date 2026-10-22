@@ -98,10 +98,26 @@ def normalize_bilans(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
 
 def build_tables(cfg: Config, bodacc_path: Path, ratios_path: Path) -> dict[str, int]:
     """Lit les fichiers bruts, normalise et écrit les tables dans DuckDB."""
-    bodacc = pd.read_parquet(bodacc_path)
-    ratios = pd.read_parquet(ratios_path)
+    import pyarrow.parquet as pq
+
+    def read_needed(path: Path, wanted: set[str]) -> pd.DataFrame:
+        # Les exports complets contiennent des dizaines de colonnes : on ne charge que l'utile
+        available = set(pq.read_schema(path).names)
+        return pd.read_parquet(path, columns=sorted(wanted & available))
+
+    bodacc = read_needed(bodacc_path, set(cfg.bodacc["columns"].values()))
+    ratios = read_needed(ratios_path, set(cfg.ratios["columns"].values()) | set(cfg.ratios["features"].values()))
+    print(f"BODACC brut : {len(bodacc)} annonces ; ratios bruts : {len(ratios)} lignes", flush=True)
     procedures = normalize_procedures(bodacc, cfg)
+    del bodacc
     bilans = normalize_bilans(ratios, cfg)
+    del ratios
+    print(
+        f"Procédures d'ouverture : {len(procedures)} ({procedures['siren'].nunique()} SIREN) ; "
+        f"bilans : {len(bilans)} ({bilans['siren'].nunique()} SIREN, "
+        f"{bilans['date_cloture'].min()} → {bilans['date_cloture'].max()})",
+        flush=True,
+    )
 
     cfg.db_path.parent.mkdir(parents=True, exist_ok=True)
     with duckdb.connect(str(cfg.db_path)) as con:

@@ -1,36 +1,90 @@
 name: Pipeline données réelles
 
-# Ingestion des données ouvertes + entraînement, chaque lundi ou à la demande.
+# Ingestion des données ouvertes + entraînement.
+# Déclencheurs : chaque lundi, à la demande, ou en modifiant .github/pipeline-trigger.
+# Les journaux et métriques sont publiés sur la branche « pipeline-results »,
+# pour pouvoir être relus sans accès à l'interface GitHub.
 on:
   workflow_dispatch:
   schedule:
     - cron: "17 5 * * 1"
+  push:
+    branches: [main]
+    paths: [".github/pipeline-trigger"]
+
+permissions:
+  contents: write
 
 jobs:
   train:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install -e .
+      - run: mkdir -p reports
+
       - name: Vérifier le schéma des sources
-        run: python -m radar inspect
+        id: inspect
+        run: set -o pipefail; python -m radar inspect 2>&1 | tee reports/1-inspect.log
+
       - name: Télécharger BODACC et ratios INPI
-        run: python -m radar ingest
+        id: ingest
+        if: steps.inspect.outcome == 'success'
+        run: set -o pipefail; python -m radar ingest 2>&1 | tee reports/2-ingest.log
+
       - name: Normaliser
-        run: python -m radar build
+        id: build
+        if: steps.ingest.outcome == 'success'
+        run: set -o pipefail; python -m radar build 2>&1 | tee reports/3-build.log
+
       - name: Entraîner et évaluer
-        run: python -m radar train
+        id: train
+        if: steps.build.outcome == 'success'
+        run: |
+          set -o pipefail
+          python -m radar train 2>&1 | tee reports/4-train.log
+          cp models/metrics.json reports/metrics.json
+
+      - name: Publier les journaux sur la branche pipeline-results
+        if: always()
+        run: |
+          {
+            echo "run: ${GITHUB_RUN_ID}"
+            echo "date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "commit: ${GITHUB_SHA}"
+            echo "inspect: ${{ steps.inspect.outcome }}"
+            echo "ingest: ${{ steps.ingest.outcome }}"
+            echo "build: ${{ steps.build.outcome }}"
+            echo "train: ${{ steps.train.outcome }}"
+            df -h / | tail -1
+            free -m | sed -n 2p
+          } > reports/0-status.txt
+          cp -r reports /tmp/reports
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin pipeline-results || true
+          git checkout -B pipeline-results
+          git rm -r -q --cached . > /dev/null
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r /tmp/reports/. .
+          git add -A
+          git commit -q -m "Résultats du run ${GITHUB_RUN_ID}"
+          git push -f origin pipeline-results
+
       - name: Résumé des métriques
+        if: steps.train.outcome == 'success'
         run: |
           echo '## Métriques du modèle' >> "$GITHUB_STEP_SUMMARY"
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
           cat models/metrics.json >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/upload-artifact@v4
+        if: steps.train.outcome == 'success'
         with:
           name: modele-et-base
           path: |
