@@ -19,7 +19,7 @@ from .store import DuckDBStore
 SITE_DIR = Path(os.getenv("RADAR_SITE_DIR", ROOT / "site"))
 
 app = FastAPI(
-    title="Acquit API",
+    title="Acquit Solutions API",
     version=__version__,
     description="Risque de défaillance d'une entreprise et conditions de paiement recommandées, "
     "à partir des données publiques.",

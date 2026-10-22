@@ -1,4 +1,4 @@
-# Acquit · vérifiez un client avant de signer
+# Acquit Solutions · vérifiez un client avant de signer
 
 *Nom de code du dépôt : radar-anti-impayes. Une marque MCF World.*
 
@@ -108,6 +108,6 @@ Projet de Clément Ferry MAMA (MCL World). Sources : BODACC (DILA), comptes annu
 
 Le code est publié sous licence **GNU AGPL-3.0 ou ultérieure** : vous pouvez l'utiliser, l'étudier, le modifier et le redistribuer librement. Si vous le proposez comme service en ligne, vous devez publier vos modifications sous la même licence.
 
-Le nom **Acquit**, le logo et la charte graphique ne sont pas couverts par cette licence et restent la propriété de MCF World. Les données réutilisées (BODACC, INPI) relèvent de la Licence Ouverte de l'État.
+Le nom **Acquit Solutions**, le logo et la charte graphique ne sont pas couverts par cette licence et restent la propriété de MCF World. Les données réutilisées (BODACC, INPI) relèvent de la Licence Ouverte de l'État.
 
 Besoin d'aller plus loin ? Le diagnostic de vos encaissements est proposé par Acquit ; les tableaux de bord et missions data, par MCF World, le groupe data et IA dont Acquit fait partie.
