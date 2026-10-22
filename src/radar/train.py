@@ -87,11 +87,31 @@ def train(df: pd.DataFrame, cfg: Config) -> dict:
     calibrated = CalibratedClassifierCV(lgb.LGBMClassifier(**params), method="isotonic", cv=3)
     calibrated.fit(X_tr, y_tr)
 
+    p_te = calibrated.predict_proba(X_te)[:, 1]
     metrics = {
         "baseline_logreg": evaluate(y_te, baseline.predict_proba(X_te)[:, 1]),
         "lightgbm": evaluate(y_te, booster.predict_proba(X_te)[:, 1]),
-        "lightgbm_calibre": evaluate(y_te, calibrated.predict_proba(X_te)[:, 1]),
+        "lightgbm_calibre": evaluate(y_te, p_te),
     }
+
+    # Distribution des probabilités et taux de défaillance observé par niveau,
+    # pour fixer des seuils qui ont un sens sur les données réelles
+    quantiles = {f"p{q}": round(float(np.quantile(p_te, q / 100)), 5) for q in (50, 70, 80, 90, 95, 99)}
+    lv = cfg.model["levels"]
+    bands = {
+        "faible": p_te < lv["faible"],
+        "modéré": (p_te >= lv["faible"]) & (p_te < lv["modere"]),
+        "élevé": p_te >= lv["modere"],
+    }
+    niveaux = {
+        name: {
+            "part_entreprises": round(float(mask.mean()), 4),
+            "taux_defaillance_observe": round(float(y_te[mask].mean()), 4) if mask.any() else None,
+        }
+        for name, mask in bands.items()
+    }
+    # Seuils proposés : 70 % des entreprises en « faible », 5 % en « élevé »
+    seuils_proposes = {"faible": quantiles["p70"], "modere": quantiles["p95"]}
     report = {
         "entraine_le": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "features": feats,
@@ -100,6 +120,9 @@ def train(df: pd.DataFrame, cfg: Config) -> dict:
         "test": {"lignes": int(len(test_df)), "taux_defaillance": round(float(y_te.mean()), 4),
                  "annees": sorted(int(a) for a in test_df["annee_observation"].unique())},
         "metrics": metrics,
+        "distribution_probabilites_test": quantiles,
+        "niveaux_actuels": {"seuils": lv, "detail": niveaux},
+        "seuils_proposes": seuils_proposes,
         "importance": dict(sorted(
             zip(feats, (int(v) for v in booster.feature_importances_)), key=lambda kv: -kv[1]
         )),
