@@ -7,6 +7,8 @@
     python -m radar train       # entraîne et évalue le modèle
     python -m radar score 123456789
     python -m radar serve       # lance l'API et l'interface web
+    python -m radar export      # paquet de service allégé (base + modèle)
+    python -m radar fetch URL   # installe un paquet de service (build de l'image)
 """
 
 from __future__ import annotations
@@ -33,6 +35,10 @@ def main(argv: list[str] | None = None) -> int:
     sc.add_argument("siren")
     sv = sub.add_parser("serve")
     sv.add_argument("--port", type=int, default=8000)
+    ex = sub.add_parser("export")
+    ex.add_argument("--out", default="dist")
+    fe = sub.add_parser("fetch")
+    fe.add_argument("url")
     args = parser.parse_args(argv)
 
     cfg = load_config()
@@ -73,6 +79,16 @@ def main(argv: list[str] | None = None) -> int:
 
         scorer = Scorer(cfg, DuckDBStore(cfg.db_path))
         print(json.dumps(scorer.score(args.siren).to_dict(), indent=2, ensure_ascii=False))
+    elif args.cmd == "export":
+        from pathlib import Path
+
+        from .export import export_serving
+
+        export_serving(cfg, Path(args.out))
+    elif args.cmd == "fetch":
+        from .export import fetch_serving
+
+        fetch_serving(args.url)
     elif args.cmd == "serve":
         import uvicorn
 

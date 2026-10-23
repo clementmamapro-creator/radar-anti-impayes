@@ -19,7 +19,9 @@ class DuckDBStore:
     """Lecture seule, une requête indexée par SIREN."""
 
     def __init__(self, db_path: Path):
+        # Mémoire et threads bornés : le service tourne sur 512 Mo et une fraction de CPU
         self.con = duckdb.connect(str(db_path), read_only=True)
+        self.con.execute("SET threads = 1; SET memory_limit = '200MB'")
 
     def _query(self, sql: str, siren: str) -> pd.DataFrame:
         # Un curseur par requête : la connexion est partagée entre les threads de l'API

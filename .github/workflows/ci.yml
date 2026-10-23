@@ -16,4 +16,4 @@ jobs:
       - name: Tests (données synthétiques, sans réseau)
         run: pytest -q
       - name: Build de l'image Docker
-        run: docker build -t radar-anti-impayes .
+        run: docker build --build-arg DEMO=1 -t radar-anti-impayes .

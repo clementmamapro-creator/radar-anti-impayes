@@ -38,7 +38,9 @@ RADAR_DEMO=1 python -m radar serve   # site + API sur http://localhost:8000
 
 Ou en une commande : `docker compose up --build`, puis http://localhost:8001 (port modifiable avec `ACQUIT_PORT`).
 
-Ou avec Docker : `docker build -t radar . && docker run -p 8000:8000 radar`.
+Ou avec Docker, sur les données fictives : `docker build --build-arg DEMO=1 -t radar . && docker run -p 8000:8000 radar`.
+
+Sans `DEMO=1`, l'image télécharge le paquet de service publié chaque semaine par le pipeline (release « modele ») : une base allégée, avec le dernier bilan de chaque entreprise et ses variables d'historique précalculées, plus le modèle entraîné sur les vraies données. C'est la version déployée en ligne.
 
 ## Passer aux vraies données
 

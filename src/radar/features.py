@@ -79,5 +79,7 @@ def latest_features(bilans: pd.DataFrame, siren: str, cfg: Config) -> pd.Series 
     b = bilans[bilans["siren"] == siren]
     if b.empty:
         return None
-    b = add_history_features(b)
+    # La base de service contient déjà ces variables, précalculées sur tout l'historique
+    if not set(EXTRA_FEATURES) <= set(b.columns):
+        b = add_history_features(b)
     return b.sort_values("date_cloture").iloc[-1]

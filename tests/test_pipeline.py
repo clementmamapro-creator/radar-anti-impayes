@@ -112,3 +112,34 @@ def test_entrainement_et_scoring(cfg, built):
     assert proc.recommandation["titre"] == "N'accordez pas de délai"
     vide = scorer.score("000000001")
     assert vide.statut == "donnees_insuffisantes" and vide.recommandation is not None
+
+
+def test_paquet_de_service_equivalent(cfg, built, tmp_path):
+    """La base allégée (un bilan par SIREN) donne exactement les mêmes scores que la base complète."""
+    import tarfile
+    from dataclasses import replace as dc_replace
+
+    from radar.export import export_serving
+    from radar.features import build_training_set
+    from radar.scoring import Scorer
+    from radar.store import DuckDBStore
+    from radar.train import train
+
+    procedures, bilans = load_tables(cfg)
+    if not (cfg.model_dir / "model.joblib").exists():
+        train(build_training_set(bilans, procedures, cfg), cfg)
+
+    archive = export_serving(cfg, tmp_path / "dist")
+    with tarfile.open(archive) as tar:
+        tar.extractall(tmp_path / "serve", filter="data")
+    raw = json.loads(json.dumps(cfg.raw))
+    raw["paths"] = {"raw_dir": "x", "db": str(tmp_path / "serve/data/radar.duckdb"),
+                    "model_dir": str(tmp_path / "serve/models")}
+    light_cfg = dc_replace(cfg, raw=raw)
+
+    full = Scorer(cfg, DuckDBStore(cfg.db_path), with_identity=False)
+    light = Scorer(light_cfg, DuckDBStore(light_cfg.db_path), with_identity=False)
+    assert len(light.store.con.execute("SELECT * FROM bilans").df()) == bilans["siren"].nunique()
+    for siren in bilans["siren"].drop_duplicates().sample(60, random_state=1):
+        a, b = full.score(siren), light.score(siren)
+        assert (a.statut, a.probabilite, a.niveau) == (b.statut, b.probabilite, b.niveau), siren

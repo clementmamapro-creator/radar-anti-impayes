@@ -69,6 +69,24 @@ jobs:
             data/radar.duckdb
           retention-days: 30
 
+      - name: Préparer le paquet de service (base allégée + modèle)
+        id: export
+        if: steps.train.outcome == 'success'
+        run: set -o pipefail; python -m radar export --out dist 2>&1 | tee reports/5-export.log
+
+      - name: Publier le paquet dans la release « modele »
+        id: release
+        if: steps.export.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view modele >/dev/null 2>&1 || gh release create modele \
+            --title "Modèle et base de service" \
+            --notes "Publié automatiquement par le pipeline hebdomadaire. Utilisé au build de l'image Docker."
+          gh release upload modele dist/acquit-serve.tar.gz --clobber
+          # Redéploie le site si un « deploy hook » Render est configuré (secret facultatif)
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}" >/dev/null; fi
+
       - name: Publier les journaux sur la branche pipeline-results
         # En dernier, dans un dossier séparé : ne touche pas au dossier de travail
         if: always()
@@ -85,6 +103,8 @@ jobs:
             echo "train: ${{ steps.train.outcome }}"
             echo "summary: ${{ steps.summary.outcome }}"
             echo "upload: ${{ steps.upload.outcome }}"
+            echo "export: ${{ steps.export.outcome }}"
+            echo "release: ${{ steps.release.outcome }}"
             df -h / | tail -1
             free -m | sed -n 2p
           } > reports/0-status.txt
