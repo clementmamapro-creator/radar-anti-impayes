@@ -1,5 +1,6 @@
 # Lancement local en une commande : docker compose up --build
-# puis ouvrir http://localhost:8000
+# puis ouvrir http://localhost:8001
+# (port modifiable : ACQUIT_PORT=8002 docker compose up --build)
 #
 # Par défaut, l'image génère des données FICTIVES et entraîne le modèle au build.
 # Pour les données réelles : passez DEMO à "0", lancez d'abord
@@ -13,7 +14,7 @@ services:
       args:
         DEMO: "1"
     ports:
-      - "8000:8000"
+      - "${ACQUIT_PORT:-8001}:8000"
     environment:
       RADAR_IDENTITY: "1"   # nom de l'entreprise via l'API Recherche d'entreprises
     # volumes:

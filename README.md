@@ -36,7 +36,7 @@ python -m radar train
 RADAR_DEMO=1 python -m radar serve   # site + API sur http://localhost:8000
 ```
 
-Ou en une commande : `docker compose up --build`.
+Ou en une commande : `docker compose up --build`, puis http://localhost:8001 (port modifiable avec `ACQUIT_PORT`).
 
 Ou avec Docker : `docker build -t radar . && docker run -p 8000:8000 radar`.
 
@@ -111,7 +111,7 @@ tests/           tests de bout en bout (sans réseau)
 
 ---
 
-Projet de Clément Ferry MAMA (MCL World). Sources : BODACC (DILA), comptes annuels (INPI), API Recherche d'entreprises.
+Projet de Clément Ferry MAMA (MCF World). Sources : BODACC (DILA), comptes annuels (INPI), API Recherche d'entreprises.
 
 ## Licence
 
