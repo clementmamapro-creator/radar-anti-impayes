@@ -14,6 +14,12 @@ COPY site ./site
 # Pour les données réelles, montez data/ et models/ produits par `radar ingest/build/train`.
 ARG DEMO=1
 ENV RADAR_DEMO=${DEMO}
+# Les hébergeurs mutualisés annoncent plus de cœurs qu'ils n'en allouent :
+# on limite les threads pour éviter l'engorgement (build et service).
+ENV OMP_NUM_THREADS=1 \
+    OPENBLAS_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1 \
+    LOKY_MAX_CPU_COUNT=1
 RUN if [ "$DEMO" = "1" ]; then python -m radar demo && python -m radar build && python -m radar train; fi
 
 EXPOSE 8000

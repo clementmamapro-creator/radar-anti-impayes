@@ -78,7 +78,7 @@ def train(df: pd.DataFrame, cfg: Config) -> dict:
     params = dict(
         n_estimators=400, learning_rate=0.03, num_leaves=15, min_child_samples=40,
         subsample=0.8, subsample_freq=1, colsample_bytree=0.8,
-        scale_pos_weight=pos_weight, random_state=rs, verbose=-1,
+        scale_pos_weight=pos_weight, random_state=rs, verbose=-1, n_jobs=1,
     )
     booster = lgb.LGBMClassifier(**params)
     booster.fit(X_tr, y_tr)
