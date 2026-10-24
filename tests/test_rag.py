@@ -134,3 +134,16 @@ def test_quota_free(monkeypatch):
         r = c.post("/assistant", json={"question": "Quel est le délai de paiement ?"})
         assert r.status_code == 200 and r.json()["questions_restantes_aujourdhui"] == limite - i - 1
     assert c.post("/assistant", json={"question": "Quel est le délai de paiement ?"}).status_code == 429
+
+
+def test_archives_et_fusion():
+    from radar.rag.legi import archives_a_lire, fusionner
+
+    page = ('<a href="Freemium_legi_global_20250101-140000.tar.gz">x</a><a href="Freemium_legi_global_20250713-140000.tar.gz">x</a>'
+            '<a href="LEGI_20250601-210000.tar.gz">x</a><a href="LEGI_20250714-210000.tar.gz">x</a><a href="LEGI_20261020-210000.tar.gz">x</a>')
+    urls = archives_a_lire(page, "B/")
+    assert urls == ["B/Freemium_legi_global_20250713-140000.tar.gz", "B/LEGI_20250714-210000.tar.gz", "B/LEGI_20261020-210000.tar.gz"]
+    ancien = Article("1", "Code de commerce", "L441-10", "ancien", "2019-04-26", "u")
+    nouveau = Article("2", "Code de commerce", "L441-10", "nouveau", "2026-01-01", "u")
+    assert [a.texte for a in fusionner([ancien], [nouveau])] == ["nouveau"]
+    assert [a.texte for a in fusionner([nouveau], [ancien])] == ["nouveau"]

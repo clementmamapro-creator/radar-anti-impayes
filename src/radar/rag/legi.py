@@ -21,6 +21,7 @@ import httpx
 from ..config import Config
 
 FREEMIUM_RE = re.compile(r'href="(Freemium_legi_global_[\d-]+\.tar\.gz)"')
+INCREMENT_RE = re.compile(r'href="(LEGI_(\d{8})-\d{6}\.tar\.gz)"')
 TAG_RE = re.compile(r"<[^>]+>")
 
 
@@ -64,13 +65,26 @@ def parse_article(raw: bytes, code_nom: str) -> Article | None:
     ) if (meta.findtext("ETAT") or "") == "VIGUEUR" else None
 
 
-def latest_freemium_url(cfg: Config, client: httpx.Client) -> str:
-    base = cfg.raw["rag"]["legi_index"]
-    page = client.get(base, timeout=60).text
+def archives_a_lire(page: str, base: str) -> list[str]:
+    """Dernier export complet, puis toutes les mises à jour quotidiennes publiées depuis."""
     files = sorted(FREEMIUM_RE.findall(page))
     if not files:
         raise RuntimeError("Aucun export Freemium LEGI trouvé sur " + base)
-    return base + files[-1]
+    freemium = files[-1]
+    date_freemium = re.search(r"(\d{8})", freemium).group(1)
+    increments = sorted({f for f, d in INCREMENT_RE.findall(page) if d >= date_freemium})
+    return [base + freemium] + [base + f for f in increments]
+
+
+def fusionner(*listes: list[Article]) -> list[Article]:
+    """Garde, pour chaque article, la version en vigueur la plus récente."""
+    best: dict[tuple[str, str], Article] = {}
+    for liste in listes:
+        for a in liste:
+            key = (a.code, a.num)
+            if key not in best or a.date_debut > best[key].date_debut:
+                best[key] = a
+    return sorted(best.values(), key=lambda a: (a.code, a.num))
 
 
 def select_articles(members, cfg: Config) -> list[Article]:
@@ -120,10 +134,19 @@ def stream_archive(url: str, text_ids: list[str]):
 
 
 def build_corpus(cfg: Config) -> Path:
+    base = cfg.raw["rag"]["legi_index"]
     with httpx.Client(follow_redirects=True) as client:
-        url = latest_freemium_url(cfg, client)
-    print("Export LEGI :", url)
-    articles = select_articles(stream_archive(url, list(cfg.raw["rag"]["articles"])), cfg)
+        urls = archives_a_lire(client.get(base, timeout=60).text, base)
+    print(f"Export LEGI complet : {urls[0]} ; mises à jour quotidiennes depuis : {len(urls) - 1}")
+    codes = list(cfg.raw["rag"]["articles"])
+    articles: list[Article] = []
+    for i, url in enumerate(urls):
+        try:
+            articles = fusionner(articles, select_articles(stream_archive(url, codes), cfg))
+        except Exception as e:  # une mise à jour illisible ne doit pas bloquer tout le corpus
+            if i == 0:
+                raise
+            print("Mise à jour ignorée :", url, e)
     expected = sum(len(s["nums"]) for s in cfg.raw["rag"]["articles"].values())
     out = cfg.corpus_path
     out.parent.mkdir(parents=True, exist_ok=True)
