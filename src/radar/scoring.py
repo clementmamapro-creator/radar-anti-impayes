@@ -112,8 +112,24 @@ def level_for(p: float, levels: dict) -> str:
     return "élevé"
 
 
+# Caches mémoire bornés : évitent de réinterroger l'API publique pour les mêmes recherches.
+# Seules les réponses réussies sont gardées, pour qu'une panne passagère ne se fige pas.
+_CACHE_MAX = 2000
+_search_cache: dict[tuple[str, int], list[dict]] = {}
+_identity_cache: dict[str, dict] = {}
+
+
+def _remember(cache: dict, key, value) -> None:
+    if len(cache) >= _CACHE_MAX:
+        cache.pop(next(iter(cache)))
+    cache[key] = value
+
+
 def search_companies(cfg: Config, query: str, limit: int = 6, timeout: float = 5.0) -> list[dict]:
     """Suggestions d'entreprises par nom (API Recherche d'entreprises). Liste vide en cas d'échec."""
+    key = (query.strip().lower(), limit)
+    if key in _search_cache:
+        return _search_cache[key]
     try:
         r = httpx.get(
             f"{cfg.entreprises['base_url']}/search",
@@ -133,11 +149,15 @@ def search_companies(cfg: Config, query: str, limit: int = 6, timeout: float = 5
             "ville": siege.get("libelle_commune"),
             "code_postal": siege.get("code_postal"),
         })
-    return [x for x in out if x["siren"]]
+    out = [x for x in out if x["siren"]]
+    _remember(_search_cache, key, out)
+    return out
 
 
 def fetch_identity(cfg: Config, siren: str, timeout: float = 5.0) -> dict | None:
     """Nom, activité et date de création via l'API Recherche d'entreprises (facultatif)."""
+    if siren in _identity_cache:
+        return _identity_cache[siren]
     try:
         r = httpx.get(f"{cfg.entreprises['base_url']}/search", params={"q": siren, "per_page": 1}, timeout=timeout)
         r.raise_for_status()
@@ -147,12 +167,14 @@ def fetch_identity(cfg: Config, siren: str, timeout: float = 5.0) -> dict | None
     if not res or res[0].get("siren") != siren:
         return None
     e = res[0]
-    return {
+    ident = {
         "nom": e.get("nom_raison_sociale") or e.get("nom_complet"),
         "activite": e.get("activite_principale"),
         "date_creation": e.get("date_creation"),
         "etat": e.get("etat_administratif"),
     }
+    _remember(_identity_cache, siren, ident)
+    return ident
 
 
 class Scorer:

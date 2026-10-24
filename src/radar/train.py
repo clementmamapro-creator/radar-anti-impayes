@@ -15,6 +15,7 @@ import joblib
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
@@ -24,6 +25,27 @@ from sklearn.preprocessing import StandardScaler
 
 from .config import Config
 from .features import model_features
+
+
+class Winsorizer(BaseEstimator, TransformerMixin):
+    """Borne chaque variable entre ses quantiles d'entraînement (1 % et 99 % par défaut).
+
+    Les ratios financiers publics contiennent des valeurs extrêmes (divisions par
+    des montants quasi nuls) qui écrasent une régression logistique.
+    """
+
+    def __init__(self, low: float = 0.01, high: float = 0.99):
+        self.low = low
+        self.high = high
+
+    def fit(self, X, y=None):
+        arr = np.asarray(X, dtype=float)
+        self.lo_ = np.nanquantile(arr, self.low, axis=0)
+        self.hi_ = np.nanquantile(arr, self.high, axis=0)
+        return self
+
+    def transform(self, X):
+        return np.clip(np.asarray(X, dtype=float), self.lo_, self.hi_)
 
 
 def temporal_split(df: pd.DataFrame, test_years: int) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -68,6 +90,7 @@ def train(df: pd.DataFrame, cfg: Config) -> dict:
 
     # Référence simple et explicable
     baseline = make_pipeline(
+        Winsorizer(),
         SimpleImputer(strategy="median"),
         StandardScaler(),
         LogisticRegression(max_iter=2000, class_weight="balanced"),

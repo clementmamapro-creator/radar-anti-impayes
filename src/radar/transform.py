@@ -30,7 +30,8 @@ def extract_sirens(registre) -> list[str]:
         text = str(registre)
     # "123 456 789" -> "123456789" ; on ne colle que les groupes de chiffres
     compact = re.sub(r"(?<=\d) (?=\d)", "", text)
-    return sorted(set(_SIREN_RE.findall(compact)))
+    # « 000000000 » est un SIREN de remplissage, pas une entreprise
+    return sorted({x for x in _SIREN_RE.findall(compact) if x != "000000000"})
 
 
 def parse_jugement(raw) -> tuple[str | None, str | None]:

@@ -35,6 +35,7 @@ def test_extract_sirens_formats():
     assert extract_sirens(["123 456 789", "987654321"]) == ["123456789", "987654321"]
     assert extract_sirens(None) == []
     assert extract_sirens("RCS Paris 123 456 789") == ["123456789"]
+    assert extract_sirens("000 000 000") == []
 
 
 def test_dates_aberrantes_ecartees(cfg):
