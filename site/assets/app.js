@@ -40,6 +40,8 @@
     var key = r.statut === "score" ? r.niveau : r.statut;
     var niv = NIVEAU[key] || ["niveau-neutre", ""];
     var nom = (r.identite && r.identite.nom) || opts.nom || (demo ? "Entreprise fictive" : "Entreprise");
+    // Entreprises dont l'identité est protégée à l'INSEE (souvent des entrepreneurs individuels)
+    if (/NON[- ]DIFFUSIBLE/i.test(nom)) nom = "Entreprise non diffusible (identité protégée)";
     var meta = ["SIREN " + siren(r.siren)];
     if (r.identite && r.identite.date_creation) meta.push("créée en " + String(r.identite.date_creation).slice(0, 4));
     var h = "";
