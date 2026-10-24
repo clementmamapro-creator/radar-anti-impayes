@@ -117,7 +117,11 @@
     }, 3500);
     fetch(API + "/score/" + digits)
       .then(function (res) { return res.json().then(function (d) { if (!res.ok) throw new Error(d.detail || "La vérification a échoué."); return d; }); })
-      .then(function (r) { afficher(r); })
+      .then(function (r) {
+        afficher(r);
+        // Mesure d'audience anonyme (Umami, sans cookie) : seul le résultat est compté, jamais le SIREN
+        try { if (window.umami) window.umami.track("verification", { statut: r.statut, niveau: r.niveau || "aucun" }); } catch (e) {}
+      })
       .catch(function (e) { fiche.innerHTML = '<p class="erreur">' + esc(e.message || "La vérification a échoué. Réessayez dans un instant.") + "</p>"; })
       .then(function () { clearTimeout(lent); bouton.disabled = false; });
     if (window.matchMedia("(max-width: 959px)").matches) fiche.scrollIntoView({ behavior: "smooth", block: "start" });
