@@ -37,6 +37,14 @@ class Config:
         return ROOT / self.raw["paths"]["model_dir"]
 
     @property
+    def corpus_path(self) -> Path:
+        return ROOT / self.raw["rag"]["corpus"]
+
+    @property
+    def rag(self) -> dict:
+        return self.raw["rag"]
+
+    @property
     def bodacc(self) -> dict:
         return self.raw["sources"]["bodacc"]
 

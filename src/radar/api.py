@@ -7,7 +7,12 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+import datetime as dt
+import hashlib
+import secrets
+
+from fastapi import FastAPI, HTTPException, Query, Request
+from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -44,6 +49,59 @@ def is_demo() -> bool:
     return os.getenv("RADAR_DEMO", "0") == "1"
 
 
+@lru_cache
+def get_assistant():
+    from .rag.assistant import Assistant
+
+    return Assistant(load_config())
+
+
+# Quota du pack Free : N questions par jour et par visiteur. Le visiteur est
+# reconnu par une empreinte salée de son adresse IP, gardée en mémoire le jour
+# même seulement (rien n'est écrit sur disque, le sel change à chaque démarrage).
+_SEL = secrets.token_hex(16)
+_quota: dict[str, int] = {}
+_quota_jour = [dt.date.today()]
+
+
+def _visiteur(request: Request) -> str:
+    ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
+    return hashlib.sha256((_SEL + ip).encode()).hexdigest()[:16]
+
+
+def _consommer(request: Request, limite: int) -> int:
+    if _quota_jour[0] != dt.date.today():
+        _quota.clear()
+        _quota_jour[0] = dt.date.today()
+    v = _visiteur(request)
+    if _quota.get(v, 0) >= limite:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Vous avez utilisé vos {limite} questions gratuites du jour. Revenez demain, "
+                   "ou passez au pack Éco pour des questions illimitées.",
+        )
+    _quota[v] = _quota.get(v, 0) + 1
+    return limite - _quota[v]
+
+
+class Question(BaseModel):
+    question: str = Field(min_length=5, max_length=1000)
+
+
+@app.post("/assistant")
+def assistant(q: Question, request: Request) -> dict:
+    """Assistant « impayés » : réponse sourcée à partir des textes de loi officiels."""
+    a = get_assistant()
+    if not a.disponible:
+        raise HTTPException(status_code=503, detail="L'assistant n'est pas encore disponible.")
+    restantes = None
+    if a.client is not None:
+        restantes = _consommer(request, load_config().rag["free_daily_quota"])
+    res = a.repondre(q.question).to_dict()
+    res["questions_restantes_aujourdhui"] = restantes
+    return res
+
+
 @app.get("/health")
 def health() -> dict:
     cfg = load_config()
@@ -51,7 +109,11 @@ def health() -> dict:
     trained = None
     if metrics_path.exists():
         trained = json.loads(metrics_path.read_text(encoding="utf-8")).get("entraine_le")
-    return {"status": "ok", "version": __version__, "modele_entraine_le": trained, "demo": is_demo()}
+    a = get_assistant()
+    return {
+        "status": "ok", "version": __version__, "modele_entraine_le": trained, "demo": is_demo(),
+        "assistant": {"articles": len(a.articles), "generation": a.client is not None},
+    }
 
 
 @app.get("/exemples")

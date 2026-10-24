@@ -1,0 +1,84 @@
+# Jeu d'évaluation de la recherche de l'assistant « impayés ».
+# Chaque question est formulée comme un artisan la poserait ; « articles » liste
+# les articles qui doivent être retrouvés pour pouvoir y répondre correctement.
+questions:
+  - question: Quel est le délai de paiement maximum entre deux entreprises ?
+    articles: [L441-10]
+  - question: Mon client veut me payer à 90 jours, a-t-il le droit ?
+    articles: [L441-10]
+  - question: Si rien n'est prévu dans le contrat, sous combien de jours mon client doit-il payer ?
+    articles: [L441-10]
+  - question: Que veut dire 45 jours fin de mois ?
+    articles: [L441-10]
+  - question: Quel taux de pénalités de retard puis-je appliquer ?
+    articles: [L441-10]
+  - question: Les pénalités de retard sont-elles dues même si je n'envoie pas de rappel ?
+    articles: [L441-10]
+  - question: Combien vaut l'indemnité forfaitaire pour frais de recouvrement ?
+    articles: [D441-5, L441-10]
+  - question: Puis-je réclamer 40 euros pour chaque facture payée en retard ?
+    articles: [D441-5, L441-10]
+  - question: Quelles mentions doivent obligatoirement figurer sur ma facture ?
+    articles: [L441-9]
+  - question: Dois-je écrire la date d'échéance et les pénalités sur la facture ?
+    articles: [L441-9]
+  - question: Existe-t-il des délais de paiement particuliers pour certains secteurs comme le transport ?
+    articles: [L441-11]
+  - question: Quelle amende risque une entreprise qui ne respecte pas les délais de paiement ?
+    articles: [L441-16]
+  - question: Mon client est en redressement judiciaire, comment récupérer mon argent ?
+    articles: [L622-24, L631-14]
+  - question: Comment déclarer ma créance quand un client est en procédure collective ?
+    articles: [L622-24, R622-24]
+  - question: Quel est le délai pour déclarer une créance après la publication au BODACC ?
+    articles: [R622-24]
+  - question: J'ai oublié de déclarer ma créance dans les délais, est-ce perdu ?
+    articles: [L622-26]
+  - question: Mon client est en liquidation judiciaire, que dois-je faire ?
+    articles: [L641-3, L622-24]
+  - question: Pendant combien de temps puis-je réclamer une facture impayée à une entreprise ?
+    articles: [L110-4, "2224"]
+  - question: Une facture de 2019 jamais payée est-elle prescrite ?
+    articles: [L110-4, "2224"]
+  - question: Comment envoyer une mise en demeure à un client qui ne paie pas ?
+    articles: ["1344"]
+  - question: Une simple lettre suffit-elle pour mettre en demeure mon débiteur ?
+    articles: ["1344"]
+  - question: À partir de quand courent les intérêts de retard au taux légal ?
+    articles: ["1231-6", "1344-1"]
+  - question: La mise en demeure fait-elle courir des intérêts moratoires ?
+    articles: ["1344-1", "1231-6"]
+  - question: Le juge peut-il accorder des délais de paiement à mon client ?
+    articles: ["1343-5"]
+  - question: Mon client demande un échéancier au tribunal, jusqu'à combien de temps ?
+    articles: ["1343-5"]
+  - question: Puis-je arrêter le chantier tant que le client ne paie pas l'acompte ?
+    articles: ["1219", "1217"]
+  - question: Quels recours ai-je quand mon client n'exécute pas le contrat ?
+    articles: ["1217"]
+  - question: Le devis signé engage-t-il vraiment mon client ?
+    articles: ["1103"]
+  - question: Comment fonctionne l'injonction de payer ?
+    articles: ["1405", "1407"]
+  - question: Dans quels cas puis-je demander une injonction de payer ?
+    articles: ["1405"]
+  - question: Quel tribunal saisir pour une injonction de payer contre une entreprise ?
+    articles: ["1406"]
+  - question: Que doit contenir la requête en injonction de payer ?
+    articles: ["1407"]
+  - question: Le juge peut-il rejeter ma demande d'injonction de payer ?
+    articles: ["1409", "1410"]
+  - question: Dans quel délai faut-il signifier l'ordonnance d'injonction de payer ?
+    articles: ["1411"]
+  - question: Mon client peut-il contester l'injonction de payer ?
+    articles: ["1412", "1416"]
+  - question: Combien de temps mon débiteur a-t-il pour faire opposition ?
+    articles: ["1416"]
+  - question: Comment obtenir la formule exécutoire après une injonction de payer ?
+    articles: ["1422"]
+  - question: Existe-t-il une procédure simple pour récupérer une petite créance sans aller au tribunal ?
+    articles: [L125-1]
+  - question: Un commissaire de justice peut-il m'aider à recouvrer une facture de moins de 5 000 euros ?
+    articles: [L125-1, R125-1]
+  - question: Qu'est-ce qu'un titre exécutoire ?
+    articles: [L111-3]

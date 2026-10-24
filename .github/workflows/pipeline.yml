@@ -69,10 +69,26 @@ jobs:
             data/radar.duckdb
           retention-days: 30
 
+      - name: Corpus juridique officiel (export LEGI de Légifrance)
+        id: corpus
+        continue-on-error: true
+        run: set -o pipefail; python -m radar corpus 2>&1 | tee reports/5-corpus.log
+
+      - name: Évaluer l'assistant (recherche + 10 réponses générées)
+        id: rageval
+        if: steps.corpus.outcome == 'success'
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          python -m radar eval-rag --generation 10 2>&1 | tee reports/6-rag-eval.log
+          cp models/rag_eval.json reports/rag_eval.json
+
       - name: Préparer le paquet de service (base allégée + modèle)
         id: export
         if: steps.train.outcome == 'success'
-        run: set -o pipefail; python -m radar export --out dist 2>&1 | tee reports/5-export.log
+        run: set -o pipefail; python -m radar export --out dist 2>&1 | tee reports/7-export.log
 
       - name: Publier le paquet dans la release « modele »
         id: release
@@ -103,6 +119,8 @@ jobs:
             echo "train: ${{ steps.train.outcome }}"
             echo "summary: ${{ steps.summary.outcome }}"
             echo "upload: ${{ steps.upload.outcome }}"
+            echo "corpus: ${{ steps.corpus.outcome }}"
+            echo "rageval: ${{ steps.rageval.outcome }}"
             echo "export: ${{ steps.export.outcome }}"
             echo "release: ${{ steps.release.outcome }}"
             df -h / | tail -1

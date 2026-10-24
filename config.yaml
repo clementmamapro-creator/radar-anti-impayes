@@ -67,3 +67,27 @@ model:
     faible: 0.02
     modere: 0.06
     eleve: 1.0
+
+# Assistant « impayés » (RAG juridique sourcé)
+rag:
+  # Source officielle : export open data LEGI de la DILA (Légifrance), Licence Ouverte
+  legi_index: https://echanges.dila.gouv.fr/OPENDATA/LEGI/
+  corpus: data/corpus.jsonl
+  # Articles retenus, par code. Version en vigueur uniquement.
+  articles:
+    LEGITEXT000005634379:   # Code de commerce
+      nom: Code de commerce
+      nums: [L110-4, L441-9, L441-10, L441-11, L441-16, D441-5, L622-24, L622-26, R622-24, L631-14, L641-3]
+    LEGITEXT000006070721:   # Code civil
+      nom: Code civil
+      nums: ["1231-6", "1231-7", "1343-5", "1344", "1344-1", "1352-7", "2224", "1103", "1217", "1219"]
+    LEGITEXT000006070716:   # Code de procédure civile
+      nom: Code de procédure civile
+      nums: ["1405", "1406", "1407", "1408", "1409", "1410", "1411", "1412", "1416", "1422", "1424"]
+    LEGITEXT000025024948:   # Code des procédures civiles d'exécution
+      nom: Code des procédures civiles d'exécution
+      nums: [L125-1, R125-1, L111-3]
+  retrieval_k: 5
+  model: claude-haiku-5-5
+  max_tokens: 900
+  free_daily_quota: 3

@@ -60,6 +60,11 @@ def export_serving(cfg: Config, out_dir: Path) -> Path:
         con.execute("CHECKPOINT")
     for name in ("model.joblib", "metrics.json"):
         shutil.copy2(cfg.model_dir / name, stage / "models" / name)
+    # Corpus juridique de l'assistant et son évaluation, s'ils ont été construits
+    if cfg.corpus_path.exists():
+        shutil.copy2(cfg.corpus_path, stage / "data" / cfg.corpus_path.name)
+    if (cfg.model_dir / "rag_eval.json").exists():
+        shutil.copy2(cfg.model_dir / "rag_eval.json", stage / "models" / "rag_eval.json")
 
     archive = out_dir / ARCHIVE
     with tarfile.open(archive, "w:gz") as tar:

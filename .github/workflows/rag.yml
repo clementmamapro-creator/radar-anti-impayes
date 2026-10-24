@@ -1,0 +1,59 @@
+name: Assistant impayés (corpus + évaluation)
+
+# Construit le corpus juridique officiel et évalue l'assistant, sans réentraîner le modèle.
+# Déclencheurs : à la demande, ou en modifiant .github/rag-trigger.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/rag-trigger"]
+
+permissions:
+  contents: write
+
+jobs:
+  rag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - run: mkdir -p reports
+
+      - name: Corpus juridique officiel (export LEGI)
+        id: corpus
+        run: set -o pipefail; python -m radar corpus 2>&1 | tee reports/1-corpus.log
+
+      - name: Évaluation (recherche + 10 réponses générées)
+        id: eval
+        if: steps.corpus.outcome == 'success'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          python -m radar eval-rag --generation 10 2>&1 | tee reports/2-eval.log
+          cp models/rag_eval.json reports/rag_eval.json
+          cp data/corpus.jsonl reports/corpus.jsonl
+
+      - name: Publier sur la branche rag-results
+        if: always()
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "run: ${GITHUB_RUN_ID}"
+            echo "commit: ${GITHUB_SHA}"
+            echo "corpus: ${{ steps.corpus.outcome }}"
+            echo "eval: ${{ steps.eval.outcome }}"
+          } > reports/0-status.txt
+          mkdir -p /tmp/results && cp -r reports/. /tmp/results/
+          cd /tmp/results
+          git init -q -b rag-results
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Assistant : run ${GITHUB_RUN_ID}"
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" rag-results

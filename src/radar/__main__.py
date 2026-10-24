@@ -9,6 +9,9 @@
     python -m radar serve       # lance l'API et l'interface web
     python -m radar export      # paquet de service allégé (base + modèle)
     python -m radar fetch URL   # installe un paquet de service (build de l'image)
+    python -m radar corpus      # textes de loi officiels pour l'assistant (export LEGI)
+    python -m radar eval-rag    # évalue la recherche de l'assistant
+    python -m radar ask "question"
 """
 
 from __future__ import annotations
@@ -39,6 +42,11 @@ def main(argv: list[str] | None = None) -> int:
     ex.add_argument("--out", default="dist")
     fe = sub.add_parser("fetch")
     fe.add_argument("url")
+    sub.add_parser("corpus")
+    ev = sub.add_parser("eval-rag")
+    ev.add_argument("--generation", type=int, default=0, help="nombre de réponses générées à contrôler (coûte des appels API)")
+    ak = sub.add_parser("ask")
+    ak.add_argument("question")
     args = parser.parse_args(argv)
 
     cfg = load_config()
@@ -89,6 +97,29 @@ def main(argv: list[str] | None = None) -> int:
         from .export import fetch_serving
 
         fetch_serving(args.url)
+    elif args.cmd == "corpus":
+        from .rag.legi import build_corpus
+
+        build_corpus(cfg)
+    elif args.cmd == "eval-rag":
+        from .config import ROOT
+        from .rag.evaluation import evaluer, load_questions
+        from .rag.legi import load_corpus
+
+        questions = load_questions(ROOT / "eval" / "questions_rag.yaml")
+        res = evaluer(load_corpus(cfg.corpus_path), questions, k=cfg.rag["retrieval_k"])
+        if args.generation:
+            from .rag.assistant import Assistant
+            from .rag.evaluation import evaluer_generation
+
+            res["generation"] = evaluer_generation(Assistant(cfg), questions, n=args.generation)
+        cfg.model_dir.mkdir(parents=True, exist_ok=True)
+        (cfg.model_dir / "rag_eval.json").write_text(json.dumps(res, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(json.dumps(res, indent=2, ensure_ascii=False))
+    elif args.cmd == "ask":
+        from .rag.assistant import Assistant
+
+        print(json.dumps(Assistant(cfg).repondre(args.question).to_dict(), indent=2, ensure_ascii=False))
     elif args.cmd == "serve":
         import uvicorn
 
