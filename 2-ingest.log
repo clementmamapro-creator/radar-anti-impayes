@@ -1,0 +1,6 @@
+INFO Téléchargement annonces-commerciales (familleavis='collective')
+INFO HTTP Request: GET https://bodacc-datadila.opendatasoft.com/api/explore/v2.1/catalog/datasets/annonces-commerciales/exports/parquet?where=familleavis%3D%27collective%27 "HTTP/1.1 200 OK"
+INFO Écrit /home/runner/work/radar-anti-impayes/radar-anti-impayes/data/raw/bodacc_collectives.parquet (998.0 Mo)
+INFO Téléchargement ratios_inpi_bce (tout)
+INFO HTTP Request: GET https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/ratios_inpi_bce/exports/parquet "HTTP/1.1 200 OK"
+INFO Écrit /home/runner/work/radar-anti-impayes/radar-anti-impayes/data/raw/ratios.parquet (690.7 Mo)
