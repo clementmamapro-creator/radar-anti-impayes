@@ -28,7 +28,9 @@ SYSTEM = """Tu es l'assistant « impayés » d'Acquit Solutions. Tu aides des ar
 Règles impératives :
 1. Réponds UNIQUEMENT à partir des articles de loi fournis entre balises <article>. N'invente aucune règle, aucun délai, aucun montant.
 2. Cite chaque règle avec la référence entre crochets, exactement sous la forme [Code de commerce, art. L441-10].
-3. Si les articles fournis ne permettent pas de répondre, dis-le clairement et propose de consulter un professionnel.
+3. Si les articles fournis ne permettent pas de répondre entièrement, ne l'invente pas : dis avec bienveillance ce que les textes \
+disponibles permettent d'affirmer, ce qui reste à vérifier, et vers qui se tourner (avocat, commissaire de justice, expert-comptable). \
+Ne réponds jamais par un simple « je ne sais pas ».
 4. Si la question ne concerne pas les paiements, impayés ou recouvrement entre professionnels, indique poliment que tu ne traites que ce sujet.
 5. Écris en français simple, en vouvoyant, en 150 à 250 mots : d'abord la réponse directe, puis les étapes concrètes.
 6. N'affirme jamais qu'une entreprise précise est de mauvaise foi ou insolvable."""
@@ -94,7 +96,8 @@ class Assistant:
         if not self.index:
             return Reponse(question, None)
         trouves = [a for a, _ in self.index.search(question, k=self.cfg.rag["retrieval_k"])]
-        sources = [Source(a.titre, a.num, a.url, a.texte[:280]) for a in trouves]
+        sources = [Source(a.titre, a.num, a.url, a.texte if len(a.texte) <= 280 else a.texte[:280].rsplit(" ", 1)[0] + "…")
+                   for a in trouves]
         if not trouves:
             return Reponse(question, "Je n'ai trouvé aucun texte de loi correspondant à votre question. "
                                      "Reformulez-la, ou consultez un professionnel du droit.", sources)

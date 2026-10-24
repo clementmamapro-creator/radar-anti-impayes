@@ -190,7 +190,7 @@ h3 { font-size: 22px; line-height: 1.3; }
 .methode p { margin: 0; color: var(--ardoise); }
 
 .tarifs { display: grid; gap: 0; margin-top: var(--space-12); border: 1px solid var(--filet); border-radius: var(--radius-md); background: var(--feuille); }
-@media (min-width: 880px) { .tarifs { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 880px) { .tarifs { grid-template-columns: repeat(3, 1fr); } }
 .tarif { padding: var(--space-8); }
 .tarif + .tarif { border-top: 1px solid var(--filet); }
 @media (min-width: 880px) { .tarif + .tarif { border-top: 0; border-left: 1px solid var(--filet); } }
@@ -230,3 +230,29 @@ h3 { font-size: 22px; line-height: 1.3; }
 
 /* Nom complet : « Acquit » en titre, « Solutions » plus discret */
 .marque em { font-style: normal; font-family: var(--sans); font-weight: 500; font-size: 0.62em; color: var(--ardoise); letter-spacing: 0; margin-left: 2px; }
+
+/* Assistant impayés */
+.assistant { background: var(--feuille); }
+.assistant-tete { max-width: 46em; }
+.assistant-tete .statut { margin-bottom: var(--space-3); }
+.assistant-form { margin-top: var(--space-8); max-width: 760px; }
+.assistant-form label { display: block; font-size: 14px; line-height: 20px; font-weight: 600; margin-bottom: var(--space-2); }
+.assistant-form textarea {
+  width: 100%; font: inherit; color: var(--encre); background: var(--papier);
+  border: 1px solid var(--bordure); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); resize: vertical;
+}
+.assistant-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-3); }
+.assistant-actions .btn { min-height: 48px; }
+.assistant-reponse { margin-top: var(--space-8); max-width: 760px; background: var(--papier); border: 1px solid var(--filet); border-radius: var(--radius-md); padding: var(--space-6); }
+.assistant-reponse[hidden] { display: none; }
+.assistant-reponse .texte p { margin: 0 0 var(--space-3); }
+.assistant-reponse .cite { font-size: 14px; color: var(--acquit); font-weight: 600; white-space: nowrap; }
+.assistant-reponse h3 { font-size: 15px; margin: var(--space-6) 0 var(--space-2); }
+.sources { list-style: none; padding: 0; margin: 0; }
+.sources li { padding: var(--space-2) 0; border-top: 1px solid var(--filet); font-size: 15px; line-height: 22px; }
+.sources .extrait { display: block; color: var(--ardoise); font-size: 14px; }
+.assistant-avert { font-size: 13px; line-height: 20px; color: var(--ardoise); margin: var(--space-4) 0 0; }
+.prix small { font-size: 15px; font-weight: 400; color: var(--ardoise); }
+.prix-annuel { margin: 0; font-size: 14px; color: var(--acquit); font-weight: 600; }
+.fiche-lien { margin: var(--space-4) 0 0; font-size: 15px; }
+.tarif .statut { display: inline-block; margin-top: var(--space-4); }

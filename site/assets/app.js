@@ -76,6 +76,7 @@
     if (r.rappel_legal) pied.push(r.rappel_legal);
     if (r.avertissement) pied.push(r.avertissement);
     h += '<p class="fiche-pied">' + esc(pied.join(" ")) + "</p>";
+    if (!opts.exemple) h += '<p class="fiche-lien"><a href="#assistant">Votre client paie en retard ? Demandez à l\'assistant quels sont vos recours →</a></p>';
     return h;
   }
 
@@ -186,6 +187,74 @@
   });
 
   afficher(EXEMPLE, { exemple: true });
+
+  // ---- Assistant « impayés » ----
+  var aform = $("#aform"), aq = $("#aq"), abouton = $("#abouton"), areponse = $("#areponse"), aquota = $("#aquota");
+
+  // Mise en forme légère de la réponse : paragraphes, listes, gras, références de loi
+  function formater(t) {
+    var html = esc(t)
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\[([^\]]+?, art(?:icle)?\.? ?[A-Z]?\d[\d-]*)\]/g, '<span class="cite">[$1]</span>');
+    return html.split(/\n{2,}/).map(function (bloc) {
+      var lignes = bloc.split("\n");
+      if (lignes.every(function (l) { return /^\s*([-•]|\d+[.)])\s+/.test(l); })) {
+        var ordonnee = /^\s*\d/.test(lignes[0]);
+        return (ordonnee ? "<ol>" : "<ul>") + lignes.map(function (l) {
+          return "<li>" + l.replace(/^\s*([-•]|\d+[.)])\s+/, "") + "</li>";
+        }).join("") + (ordonnee ? "</ol>" : "</ul>");
+      }
+      return "<p>" + lignes.join("<br>") + "</p>";
+    }).join("");
+  }
+
+  function afficherReponse(r) {
+    var h = "";
+    if (r.reponse) {
+      h += '<div class="texte">' + formater(r.reponse) + "</div>";
+    } else {
+      h += "<p>Voici les textes de loi qui correspondent à votre question.</p>";
+    }
+    if (r.sources && r.sources.length) {
+      h += "<h3>Textes officiels utilisés</h3><ul class=\"sources\">" + r.sources.map(function (s) {
+        return '<li><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.reference) + "</a>" +
+          '<span class="extrait">' + esc(s.extrait) + "</span></li>";
+      }).join("") + "</ul>";
+    }
+    h += '<p class="assistant-avert">' + esc(r.avertissement || "") + "</p>";
+    areponse.innerHTML = h;
+    areponse.hidden = false;
+    if (r.questions_restantes_aujourdhui != null) {
+      aquota.textContent = r.questions_restantes_aujourdhui + " question(s) gratuite(s) restante(s) aujourd'hui";
+    }
+  }
+
+  function poser(question) {
+    question = question.trim();
+    if (question.length < 5) { aq.focus(); return; }
+    abouton.disabled = true;
+    areponse.hidden = false;
+    areponse.innerHTML = '<p class="fiche-attente">Recherche dans les textes de loi…</p>';
+    var lent = setTimeout(function () {
+      var p = areponse.querySelector(".fiche-attente");
+      if (p) p.textContent = "Le service se réveille, cela peut prendre jusqu'à une minute.";
+    }, 6000);
+    fetch(API + "/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: question }) })
+      .then(function (res) { return res.json().then(function (d) { if (!res.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Votre question doit faire entre 5 et 1 000 caractères."); return d; }); })
+      .then(function (r) {
+        afficherReponse(r);
+        try { if (window.umami) window.umami.track("assistant", { genere: !!r.genere }); } catch (e) {}
+      })
+      .catch(function (e) { areponse.innerHTML = '<p class="erreur">' + esc(typeof e.message === "string" ? e.message : "La réponse a échoué. Réessayez dans un instant.") + "</p>"; })
+      .then(function () { clearTimeout(lent); abouton.disabled = false; });
+  }
+
+  if (aform) {
+    aform.addEventListener("submit", function (e) { e.preventDefault(); poser(aq.value); });
+    document.querySelectorAll("#aexemples button").forEach(function (b) {
+      b.addEventListener("click", function () { aq.value = b.textContent; poser(b.textContent); });
+    });
+  }
 
   // Mode démonstration : bandeau et exemples cliquables
   fetch(API + "/health").then(function (r) { return r.json(); }).then(function (h) {

@@ -6,6 +6,16 @@
 <title>Acquit Solutions · Vérifiez un client avant de signer</title>
 <meta name="description" content="Avant d'envoyer un devis, vérifiez votre futur client et sachez s'il faut demander un acompte. Gratuit, à partir des comptes publics et des annonces légales.">
 <link rel="icon" href="assets/acquit-tampon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Acquit Solutions">
+<meta property="og:title" content="Acquit Solutions · Vérifiez un client avant de signer">
+<meta property="og:description" content="Avant d'envoyer un devis, sachez s'il faut demander un acompte. Gratuit, à partir des comptes publics et des annonces légales.">
+<meta property="og:url" content="https://acquit-solutions.fr/">
+<meta property="og:image" content="https://acquit-solutions.fr/assets/og-acquit.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://acquit-solutions.fr/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
@@ -23,6 +33,7 @@
       <span>Acquit <em>Solutions</em></span>
     </a>
     <nav class="nav" aria-label="Navigation principale">
+      <a href="#assistant">Assistant impayés</a>
       <a href="#fonctionnement">Comment ça marche</a>
       <a href="#methode">Méthode</a>
       <a href="#tarifs">Tarifs</a>
@@ -58,6 +69,31 @@
     </div>
   </section>
 
+  <section class="section assistant" id="assistant">
+    <div class="wrap">
+      <div class="assistant-tete">
+        <span class="statut statut-dispo">Nouveau</span>
+        <h2>Votre client ne paie pas ? Posez votre question.</h2>
+        <p class="intro">L'assistant répond à partir des textes de loi officiels (Légifrance) et cite chaque article utilisé. 3 questions gratuites par jour.</p>
+      </div>
+      <form class="assistant-form" id="aform" novalidate>
+        <label for="aq">Votre question</label>
+        <textarea id="aq" rows="3" maxlength="1000" placeholder="Ex. : Mon client a 30 jours de retard, puis-je lui facturer des pénalités ?" required></textarea>
+        <div class="assistant-actions">
+          <button class="btn btn-principal" type="submit" id="abouton">Poser ma question</button>
+          <span class="aide" id="aquota"></span>
+        </div>
+        <div class="exemples" id="aexemples">
+          <button type="button">Quel est le délai de paiement maximum entre entreprises ?</button>
+          <button type="button">Combien puis-je réclamer pour une facture payée en retard ?</button>
+          <button type="button">Comment faire une injonction de payer ?</button>
+          <button type="button">Mon client est en redressement judiciaire, que faire ?</button>
+        </div>
+      </form>
+      <div class="assistant-reponse" id="areponse" aria-live="polite" hidden></div>
+    </div>
+  </section>
+
   <section class="section" id="fonctionnement">
     <div class="wrap">
       <h2>Un impayé se prévient avant le devis, pas après la facture.</h2>
@@ -75,8 +111,8 @@
         </li>
         <li>
           <h3>Après l'échéance</h3>
-          <p>Relancez avec des courriers prêts à envoyer, du plus cordial à la mise en demeure, et connaissez vos recours.</p>
-          <span class="statut statut-bientot">En préparation</span>
+          <p>Connaissez vos recours grâce à l'assistant, qui cite les textes de loi. Bientôt : des courriers de relance prêts à envoyer, du plus cordial à la mise en demeure.</p>
+          <span class="statut statut-dispo">Assistant disponible</span>
         </li>
       </ol>
     </div>
@@ -106,26 +142,44 @@
   <section class="section" id="tarifs">
     <div class="wrap">
       <h2>Vérifier un client reste gratuit.</h2>
+      <p class="intro">Les offres Éco et Pro ouvriront prochainement. Prix indicatifs, TVA non applicable (article 293 B du CGI).</p>
       <div class="tarifs">
         <div class="tarif">
-          <h3>Vérification</h3>
+          <h3>Free</h3>
           <p class="prix">Gratuit</p>
           <ul>
-            <li>Niveau de risque estimé et conditions de paiement recommandées</li>
+            <li>Vérification d'un client : risque et conditions de paiement</li>
             <li>Annonces légales de procédure collective</li>
+            <li>Assistant impayés : 3 questions par jour</li>
             <li>Sans inscription</li>
           </ul>
         </div>
         <div class="tarif">
-          <h3>Suivi et relances</h3>
-          <p class="prix">En préparation</p>
+          <h3>Éco</h3>
+          <p class="prix">8,99 € <small>par mois</small></p>
+          <p class="prix-annuel">ou 6,99 €/mois en annuel</p>
           <ul>
-            <li>Suivi de vos factures et des retards probables</li>
-            <li>Prévision de trésorerie à 30, 60 et 90 jours</li>
-            <li>Courriers de relance prêts à envoyer</li>
+            <li>Assistant impayés : 100 questions par mois</li>
+            <li>20 courriers de relance et de mise en demeure par mois</li>
+            <li>Surveillance de 25 clients : alerte en cas de procédure</li>
+            <li>Fiche client en PDF</li>
           </ul>
+          <span class="statut statut-bientot">Bientôt</span>
+        </div>
+        <div class="tarif">
+          <h3>Pro</h3>
+          <p class="prix">35 € <small>par mois</small></p>
+          <p class="prix-annuel">ou 29,75 €/mois en annuel</p>
+          <ul>
+            <li>Assistant et courriers en usage illimité</li>
+            <li>Surveillance de 250 clients</li>
+            <li>Import des factures et prévision des retards de paiement</li>
+            <li>Projection de trésorerie et relances programmées</li>
+          </ul>
+          <span class="statut statut-bientot">Bientôt</span>
         </div>
       </div>
+      <p class="intro">Besoin d'aller plus loin ? Diagnostic de vos encaissements, tableaux de bord sur mesure, formation : <a href="mailto:contact@acquit-solutions.fr">écrivez-nous</a>.</p>
     </div>
   </section>
 
