@@ -256,3 +256,30 @@ h3 { font-size: 22px; line-height: 1.3; }
 .prix-annuel { margin: 0; font-size: 14px; color: var(--acquit); font-weight: 600; }
 .fiche-lien { margin: var(--space-4) 0 0; font-size: 15px; }
 .tarif .statut { display: inline-block; margin-top: var(--space-4); }
+
+/* Confort de lecture */
+html { scroll-padding-top: 88px; }
+.entete { position: sticky; top: 0; z-index: 30; transition: box-shadow 200ms ease, background-color 200ms ease; }
+.entete.defile { box-shadow: 0 1px 2px rgba(20, 33, 61, 0.05), 0 6px 18px rgba(20, 33, 61, 0.07); }
+@supports (backdrop-filter: blur(8px)) {
+  .entete.defile { background: color-mix(in srgb, var(--papier) 88%, transparent); backdrop-filter: saturate(160%) blur(10px); }
+}
+.progression { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--acquit); transform-origin: 0 50%; transform: scaleX(0); }
+.nav a.actif:not(.btn) { color: var(--acquit); text-decoration: underline; text-decoration-thickness: 2px; }
+.retour-haut {
+  position: fixed; right: var(--space-4); bottom: var(--space-4); z-index: 30;
+  width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--filet);
+  background: var(--feuille); color: var(--encre); box-shadow: var(--shadow-fiche);
+  display: grid; place-items: center; cursor: pointer;
+  opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity 200ms ease, transform 200ms ease;
+}
+.retour-haut svg { width: 22px; height: 22px; }
+.retour-haut.visible { opacity: 1; transform: none; pointer-events: auto; }
+.retour-haut:hover { color: var(--acquit); border-color: var(--acquit); }
+@media (min-width: 720px) { .retour-haut { right: var(--space-8); bottom: var(--space-8); } }
+.revele { opacity: 0; transform: translateY(18px); transition: opacity 600ms cubic-bezier(.2,.8,.2,1), transform 600ms cubic-bezier(.2,.8,.2,1); }
+.revele.visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .entete, .retour-haut, .revele { transition: none; }
+}
