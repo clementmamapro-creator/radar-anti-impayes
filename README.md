@@ -60,7 +60,7 @@ Données publiques complètes : 3,4 millions d'annonces BODACC, 6,8 millions de 
 
 | Modèle | ROC AUC | PR AUC | Rappel top 10 % | Brier |
 |---|---|---|---|---|
-| Régression logistique | 0,556 | 0,011 | 13 % | 0,226 |
+| Régression logistique (ratios bornés) | 0,744 | 0,022 | 32 % | 0,201 |
 | LightGBM | 0,824 | 0,052 | 50 % | 0,159 |
 | **LightGBM calibré** | **0,825** | **0,052** | **50 %** | **0,009** |
 
@@ -74,7 +74,7 @@ Parmi les 10 % d'entreprises jugées les plus risquées, on retrouve la moitié 
 | Modéré | 2 à 6 % | 7,3 % | 4,0 % |
 | Élevé | ≥ 6 % | 1,2 % | 9,2 % |
 
-La référence logistique s'effondre sur les données réelles, à cause des valeurs extrêmes des ratios : un bornage (winsorisation) est prévu. Les tests automatiques, eux, tournent sur des données synthétiques au format des sources.
+Sans traitement, la référence logistique s'effondrait (AUC 0,556) à cause des valeurs extrêmes des ratios ; les borner aux quantiles 1 % et 99 % de l'entraînement (winsorisation) la remonte à 0,744. LightGBM reste nettement devant, ce qui justifie le modèle plus complexe. Les tests automatiques, eux, tournent sur des données synthétiques au format des sources.
 
 ## Choix techniques
 
