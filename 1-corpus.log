@@ -1,0 +1,5 @@
+INFO HTTP Request: GET https://echanges.dila.gouv.fr/OPENDATA/LEGI/ "HTTP/1.1 200 OK"
+INFO HTTP Request: GET https://echanges.dila.gouv.fr/OPENDATA/LEGI/Freemium_legi_global_20250713-140000.tar.gz "HTTP/1.1 200 OK"
+Export LEGI : https://echanges.dila.gouv.fr/OPENDATA/LEGI/Freemium_legi_global_20250713-140000.tar.gz
+Corpus : 34/35 articles -> /home/runner/work/radar-anti-impayes/radar-anti-impayes/data/corpus.jsonl
+Articles introuvables : 1424
