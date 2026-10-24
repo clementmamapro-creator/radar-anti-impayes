@@ -22,15 +22,19 @@ def load_questions(path: Path) -> list[dict]:
         return yaml.safe_load(f)["questions"]
 
 
-def evaluer(articles: list[Article], questions: list[dict], k: int = 5) -> dict:
-    index = BM25Index(articles)
+def evaluer(articles: list[Article], questions: list[dict], k: int = 5, themes: dict | None = None,
+            recherche=None) -> dict:
+    """`recherche(question, k)` -> liste d'articles ; par défaut, BM25 seul."""
+    index = BM25Index(articles, themes=themes)
+    if recherche is None:
+        recherche = lambda q, k: [a for a, _ in index.search(q, k=k)]  # noqa: E731
     presents = {a.num for a in articles}
     rappels, reussites, rr, echecs = [], [], [], []
     for q in questions:
         attendus = [str(n) for n in q["articles"] if str(n) in presents]
         if not attendus:
             continue
-        trouves = [a.num for a, _ in index.search(q["question"], k=k)]
+        trouves = [a.num for a in recherche(q["question"], k)]
         hits = [n for n in attendus if n in trouves]
         rappels.append(len(hits) / len(attendus))
         reussites.append(1.0 if hits else 0.0)
@@ -61,6 +65,8 @@ def evaluer_generation(assistant, questions: list[dict], n: int = 10) -> dict:
     for q in questions[:n]:
         r = assistant.repondre(q["question"])
         if not r.genere:
+            lignes.append({"question": q["question"], "citee": False, "fidele": True, "attendu_cite": False,
+                           "reponse": None, "fin": r.fin})
             continue
         cites = {num for _, num in CITATION_RE.findall(r.reponse or "")}
         lignes.append({
@@ -69,6 +75,7 @@ def evaluer_generation(assistant, questions: list[dict], n: int = 10) -> dict:
             "fidele": not r.citations_non_fournies,
             "attendu_cite": bool(cites & {str(x) for x in q["articles"]}),
             "reponse": r.reponse,
+            "fin": r.fin,
         })
     m = len(lignes)
     part = lambda k: round(sum(x[k] for x in lignes) / m, 3) if m else None  # noqa: E731

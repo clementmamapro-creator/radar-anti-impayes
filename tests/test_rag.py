@@ -103,8 +103,11 @@ def test_assistant_genere_et_verifie_les_citations():
     assert r.genere and "60 jours" in r.reponse
     assert r.citations_non_fournies == ["9999"]
     assert any(s.num == "L441-10" for s in r.sources)
-    prompt = fake.calls[0]["messages"][0]["content"]
+    assert len(fake.calls) == 2  # reformulation de la question, puis réponse
+    assert "<article" not in fake.calls[0]["messages"][0]["content"]
+    prompt = fake.calls[1]["messages"][0]["content"]
     assert "<article" in prompt and "L441-10" in prompt  # le modèle ne voit que les articles retrouvés
+    assert fake.calls[1]["thinking"] == {"type": "disabled"}
 
 
 def test_assistant_sans_cle_renvoie_les_sources(monkeypatch):

@@ -35,6 +35,11 @@ Ne réponds jamais par un simple « je ne sais pas ».
 5. Écris en français simple, en vouvoyant, en 150 à 250 mots : d'abord la réponse directe, puis les étapes concrètes.
 6. N'affirme jamais qu'une entreprise précise est de mauvaise foi ou insolvable."""
 
+REFORMULATION = """Tu prépares une recherche dans des articles de loi français sur les délais de paiement, \
+les impayés et le recouvrement entre professionnels. Transforme la question en 8 à 15 mots-clés juridiques \
+français (ex. : prescription, mise en demeure, injonction de payer, délai de grâce, exception d'inexécution, \
+déclaration de créance, pénalités de retard). Réponds uniquement par les mots-clés séparés par des espaces."""
+
 CITATION_RE = re.compile(r"\[([^\]]+?),\s*art(?:icle)?\.?\s*([A-Z]?\d[\d-]*)\]")
 
 
@@ -53,6 +58,7 @@ class Reponse:
     sources: list[Source] = field(default_factory=list)
     citations_non_fournies: list[str] = field(default_factory=list)
     genere: bool = False
+    fin: str | None = None  # raison d'arrêt du modèle (diagnostic)
     avertissement: str = AVERTISSEMENT
 
     def to_dict(self) -> dict:
@@ -76,7 +82,7 @@ class Assistant:
     def __init__(self, cfg: Config, articles: list[Article] | None = None, client=None):
         self.cfg = cfg
         self.articles = articles if articles is not None else load_corpus(cfg.corpus_path)
-        self.index = BM25Index(self.articles) if self.articles else None
+        self.index = BM25Index(self.articles, themes=cfg.rag.get("themes")) if self.articles else None
         self._client = client
 
     @property
@@ -91,11 +97,35 @@ class Assistant:
             self._client = anthropic.Anthropic()
         return self._client
 
+    def _appel(self, system: str, contenu: str, max_tokens: int):
+        """Appel au modèle, sans réflexion étendue : la réponse doit tenir dans le budget de jetons."""
+        kwargs = dict(model=self.cfg.rag["model"], max_tokens=max_tokens, system=system,
+                      messages=[{"role": "user", "content": contenu}])
+        try:
+            msg = self.client.messages.create(thinking={"type": "disabled"}, **kwargs)
+        except TypeError:  # client de test sans ce paramètre
+            msg = self.client.messages.create(**kwargs)
+        except Exception as e:  # modèle qui refuserait le paramètre : on réessaie sans
+            if "thinking" not in str(e):
+                raise
+            msg = self.client.messages.create(**kwargs)
+        texte = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text").strip()
+        return texte, getattr(msg, "stop_reason", None)
+
+    def rechercher(self, question: str, k: int | None = None, reformuler: bool = True) -> list[Article]:
+        """Recherche hybride : la question telle quelle, enrichie de mots-clés juridiques proposés par le modèle."""
+        k = k or self.cfg.rag["retrieval_k"]
+        requete = question
+        if reformuler and self.client is not None:
+            mots, _ = self._appel(REFORMULATION, question, 120)
+            requete = f"{question} {mots}"
+        return [a for a, _ in self.index.search(requete, k=k)]
+
     def repondre(self, question: str) -> Reponse:
         question = question.strip()[:1000]
         if not self.index:
             return Reponse(question, None)
-        trouves = [a for a, _ in self.index.search(question, k=self.cfg.rag["retrieval_k"])]
+        trouves = self.rechercher(question)
         sources = [Source(a.titre, a.num, a.url, a.texte if len(a.texte) <= 280 else a.texte[:280].rsplit(" ", 1)[0] + "…")
                    for a in trouves]
         if not trouves:
@@ -103,11 +133,7 @@ class Assistant:
                                      "Reformulez-la, ou consultez un professionnel du droit.", sources)
         if self.client is None:
             return Reponse(question, None, sources)
-        msg = self.client.messages.create(
-            model=self.cfg.rag["model"],
-            max_tokens=self.cfg.rag["max_tokens"],
-            system=SYSTEM,
-            messages=[{"role": "user", "content": f"{_contexte(trouves)}\n\nQuestion : {question}"}],
-        )
-        texte = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text").strip()
-        return Reponse(question, texte, sources, verifier_citations(texte, trouves), genere=True)
+        texte, stop = self._appel(SYSTEM, f"{_contexte(trouves)}\n\nQuestion : {question}", self.cfg.rag["max_tokens"])
+        if not texte:
+            return Reponse(question, None, sources, fin=stop)
+        return Reponse(question, texte, sources, verifier_citations(texte, trouves), genere=True, fin=stop)

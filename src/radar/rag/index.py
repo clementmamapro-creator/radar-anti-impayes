@@ -43,6 +43,15 @@ SYNONYMES = {
     "huissier": "commissaire justice",
     "prescription": "prescription",
     "recuperer": "recouvrement",
+    "prescrit": "prescription",
+    "prescrite": "prescription",
+    "echeancier": "delai grace report echelonnement",
+    "arreter": "suspendre exception inexecution",
+    "chantier": "travaux execution",
+    "devis": "contrat",
+    "engage": "force obligatoire contrat",
+    "declarer": "declaration",
+    "executoire": "formule executoire",
 }
 
 
@@ -70,11 +79,15 @@ def tokens(text: str, expand: bool = False) -> list[str]:
 
 
 class BM25Index:
-    def __init__(self, articles: list[Article], k1: float = 1.4, b: float = 0.75):
+    def __init__(self, articles: list[Article], k1: float = 1.4, b: float = 0.75, themes: dict | None = None):
         self.articles = articles
         self.k1, self.b = k1, b
-        # Le titre (code + numéro) est indexé avec le texte
-        self.docs = [tokens(f"{a.titre} {a.num.lower()} {a.texte}") for a in articles]
+        themes = {str(k): v for k, v in (themes or {}).items()}
+        # Indexé : titre (code + numéro), thèmes éditoriaux (comptés deux fois : ils résument l'article) et texte officiel
+        self.docs = [
+            tokens(f"{a.titre} {a.num.lower()} {themes.get(a.num, '')} {themes.get(a.num, '')} {a.texte}")
+            for a in articles
+        ]
         self.tf = [Counter(d) for d in self.docs]
         self.avgdl = sum(len(d) for d in self.docs) / max(1, len(self.docs))
         df = Counter(t for d in self.docs for t in set(d))

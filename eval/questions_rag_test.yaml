@@ -1,0 +1,33 @@
+# Jeu de TEST de la recherche : questions rédigées après le réglage de l'index,
+# jamais utilisées pour l'ajuster. Il mesure la performance réelle sur des formulations nouvelles.
+questions:
+  - question: Un fournisseur peut-il exiger d'être payé en 120 jours ?
+    articles: [L441-10]
+  - question: Combien d'intérêts de retard puis-je demander sur une facture B2B ?
+    articles: [L441-10]
+  - question: Je n'ai pas mis les pénalités sur ma facture, est-ce un problème ?
+    articles: [L441-9, L441-16]
+  - question: Le forfait de recouvrement s'élève à combien ?
+    articles: [D441-5]
+  - question: Une entreprise cliente vient d'être placée en sauvegarde, je fais quoi pour être payé ?
+    articles: [L622-24, R622-24]
+  - question: J'ai raté la date limite pour me déclarer auprès du mandataire judiciaire.
+    articles: [L622-26]
+  - question: Au bout de combien d'années une dette commerciale est-elle éteinte ?
+    articles: [L110-4, "2224"]
+  - question: Quel courrier envoyer avant d'aller en justice pour une facture ?
+    articles: ["1344", "1344-1"]
+  - question: Le client me demande de payer en plusieurs fois devant le juge, c'est possible ?
+    articles: ["1343-5"]
+  - question: Puis-je suspendre la livraison si mon client ne règle pas ?
+    articles: ["1219"]
+  - question: Où déposer une demande d'injonction de payer contre une SARL ?
+    articles: ["1406"]
+  - question: Mon débiteur a reçu l'ordonnance, combien de temps peut-il la contester ?
+    articles: ["1416"]
+  - question: L'ordonnance n'a jamais été signifiée, est-elle encore valable ?
+    articles: ["1411"]
+  - question: Pour une facture de 2 000 euros, existe-t-il une solution sans juge ?
+    articles: [L125-1]
+  - question: Mon client est liquidé, puis-je encore récupérer quelque chose ?
+    articles: [L641-3, L622-24]

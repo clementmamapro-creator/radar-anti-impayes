@@ -89,5 +89,41 @@ rag:
       nums: [L125-1, R125-1, L111-3]
   retrieval_k: 5
   model: claude-haiku-5-5
-  max_tokens: 900
+  max_tokens: 1500
   free_daily_quota: 3
+  # Thèmes éditoriaux : décrivent chaque article dans les mots des TPE (enrichissement de l'index)
+  themes:
+    L110-4: prescription délai pour agir réclamer une facture entre commerçants cinq ans
+    L441-9: facture mentions obligatoires date d'échéance pénalités indemnité forfaitaire bon de commande
+    L441-10: délai de paiement maximum soixante jours quarante-cinq jours fin de mois trente jours pénalités de retard taux BCE indemnité forfaitaire
+    L441-11: délais de paiement dérogatoires par secteur transport alcool accords interprofessionnels
+    L441-16: amende administrative non-respect des délais de paiement sanction DGCCRF
+    D441-5: montant de l'indemnité forfaitaire frais de recouvrement quarante euros
+    L622-24: déclaration de créance procédure collective sauvegarde redressement mandataire judiciaire
+    L622-26: forclusion créance non déclarée relevé de forclusion délai dépassé
+    R622-24: délai de déclaration des créances deux mois publication BODACC jugement d'ouverture
+    L631-14: redressement judiciaire application des règles de la sauvegarde aux créanciers
+    L641-3: liquidation judiciaire effets déclaration des créances liquidateur
+    "1103": force obligatoire du contrat devis signé engagement
+    "1217": inexécution du contrat recours exécution forcée réduction du prix résolution dommages et intérêts
+    "1219": exception d'inexécution suspendre ses travaux refuser d'exécuter tant que l'autre ne paie pas
+    "1231-6": intérêts moratoires taux légal retard de paiement à compter de la mise en demeure
+    "1231-7": intérêts sur condamnation judiciaire
+    "1343-5": délais de grâce report échelonnement échéancier accordé par le juge deux ans
+    "1344": mise en demeure lettre de relance sommation
+    "1344-1": mise en demeure fait courir les intérêts moratoires
+    "1352-7": restitution de mauvaise foi intérêts
+    "2224": prescription cinq ans action en paiement
+    "1405": injonction de payer conditions créance contractuelle montant déterminé
+    "1406": injonction de payer tribunal compétent domicile du débiteur
+    "1407": requête en injonction de payer contenu pièces justificatives montant décompte
+    "1408": injonction de payer renvoi en cas d'opposition
+    "1409": décision du juge injonction de payer acceptation rejet partiel
+    "1410": rejet de la requête en injonction de payer
+    "1411": signification de l'ordonnance six mois caducité commissaire de justice
+    "1412": opposition du débiteur contestation de l'injonction de payer
+    "1416": délai d'opposition un mois après signification
+    "1422": formule exécutoire demande après expiration du délai d'opposition
+    L125-1: procédure simplifiée de recouvrement des petites créances commissaire de justice cinq mille euros
+    R125-1: petites créances montant maximum modalités
+    L111-3: titre exécutoire liste jugement injonction de payer

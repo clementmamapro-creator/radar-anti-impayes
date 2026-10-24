@@ -103,16 +103,21 @@ def main(argv: list[str] | None = None) -> int:
         build_corpus(cfg)
     elif args.cmd == "eval-rag":
         from .config import ROOT
-        from .rag.evaluation import evaluer, load_questions
-        from .rag.legi import load_corpus
+        from .rag.assistant import Assistant
+        from .rag.evaluation import evaluer, evaluer_generation, load_questions
 
-        questions = load_questions(ROOT / "eval" / "questions_rag.yaml")
-        res = evaluer(load_corpus(cfg.corpus_path), questions, k=cfg.rag["retrieval_k"])
+        assistant = Assistant(cfg)
+        k = cfg.rag["retrieval_k"]
+        res = {}
+        for nom, fichier in (("reglage", "questions_rag.yaml"), ("test", "questions_rag_test.yaml")):
+            qs = load_questions(ROOT / "eval" / fichier)
+            res[nom] = {"bm25": evaluer(assistant.articles, qs, k=k, themes=cfg.rag.get("themes"))}
+            if assistant.client is not None:
+                res[nom]["hybride"] = evaluer(assistant.articles, qs, k=k,
+                                              recherche=lambda q, kk: assistant.rechercher(q, kk))
         if args.generation:
-            from .rag.assistant import Assistant
-            from .rag.evaluation import evaluer_generation
-
-            res["generation"] = evaluer_generation(Assistant(cfg), questions, n=args.generation)
+            qs = load_questions(ROOT / "eval" / "questions_rag.yaml") + load_questions(ROOT / "eval" / "questions_rag_test.yaml")
+            res["generation"] = evaluer_generation(assistant, qs[:: max(1, len(qs) // args.generation)], n=args.generation)
         cfg.model_dir.mkdir(parents=True, exist_ok=True)
         (cfg.model_dir / "rag_eval.json").write_text(json.dumps(res, indent=2, ensure_ascii=False), encoding="utf-8")
         print(json.dumps(res, indent=2, ensure_ascii=False))
