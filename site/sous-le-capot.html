@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sous le capot · Acquit Solutions</title>
+<meta name="description" content="Architecture, métriques en direct, modèle et assistant IA d'Acquit Solutions : un produit d'IA en production, observable en temps réel.">
+<link rel="icon" href="assets/acquit-tampon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/acquit.css?v=20261025b">
+<script defer src="https://cloud.umami.is/script.js" data-website-id="48bad13f-c477-4195-9fd3-00dcf9cde7f7" data-domains="acquit-solutions.fr,www.acquit-solutions.fr"></script>
+</head>
+<body class="page-capot">
+<header class="entete">
+  <div class="wrap">
+    <a class="marque" href="./" aria-label="Acquit Solutions, accueil">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M21.5 33.5 L28.5 40.5 L43 25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"/></svg>
+      <span>Acquit <em>Solutions</em></span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="./#assistant">Assistant</a>
+      <a href="./#methode">Méthode</a>
+      <a href="./#tarifs">Tarifs</a>
+      <a href="sous-le-capot.html">Sous le capot</a>
+      <a href="a-propos.html">À propos</a>
+      <a class="btn btn-principal" href="./#verifier">Vérifier un client</a>
+    </nav>
+    <a class="nav-court" href="./#verifier">Vérifier un client</a>
+  </div>
+</header>
+
+<main class="capot" id="contenu">
+
+  <section class="capot-hero">
+    <div class="wrap">
+      <p class="capot-sur"><span class="direct"><i></i>En direct</span> Sous le capot</p>
+      <h1>Un produit d'IA en production,<br><span class="degrade">observable en temps réel.</span></h1>
+      <p class="capot-chapeau">Données publiques, machine learning, IA générative et MLOps : voici comment Acquit fonctionne, et ce que fait le serveur à cet instant.</p>
+      <div class="kpis" id="kpis">
+        <div class="kpi"><span class="kpi-val" data-k="p95">–</span><span class="kpi-lib">latence p95 de l'API</span></div>
+        <div class="kpi"><span class="kpi-val" data-k="req">–</span><span class="kpi-lib">requêtes, 15 dernières min</span></div>
+        <div class="kpi"><span class="kpi-val" data-k="entreprises">–</span><span class="kpi-lib">entreprises consultables</span></div>
+        <div class="kpi"><span class="kpi-val" data-k="auc">–</span><span class="kpi-lib">ROC AUC du modèle</span></div>
+        <div class="kpi"><span class="kpi-val" data-k="rag">–</span><span class="kpi-lib">bon article trouvé (test)</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="capot-section">
+    <div class="wrap">
+      <h2>L'architecture</h2>
+      <p class="capot-intro">Deux chaînes d'IA, un seul service. Survolez ou touchez une brique pour voir ce qu'elle fait.</p>
+      <div class="archi" id="archi">
+        <div class="voie">
+          <p class="voie-titre">Score de risque <span>machine learning</span></p>
+          <div class="noeuds">
+            <button class="noeud" data-d="Annonces BODACC (3,4 millions) et comptes annuels INPI (6,8 millions de bilans), en open data sous Licence Ouverte."><b>Données publiques</b><small>BODACC · INPI</small></button>
+            <span class="flux"></span>
+            <button class="noeud" data-d="Collecte par API, contrôle automatique du schéma, nettoyage, stockage analytique sans serveur."><b>Ingestion</b><small>httpx · DuckDB · Parquet</small></button>
+            <span class="flux"></span>
+            <button class="noeud" data-d="Cible sans fuite temporelle (bilan disponible à clôture + 7 mois, défaillance dans les 12 mois), découpage par année, LightGBM calibré par régression isotonique, comparé à une régression logistique."><b>Entraînement</b><small>LightGBM · calibration</small></button>
+            <span class="flux"></span>
+            <button class="noeud" data-d="Chaque score est décomposé avec SHAP : les 3 facteurs qui pèsent le plus, traduits en langage clair."><b>Explicabilité</b><small>SHAP</small></button>
+          </div>
+        </div>
+        <div class="voie">
+          <p class="voie-titre">Assistant juridique <span>IA générative · RAG</span></p>
+          <div class="noeuds">
+            <button class="noeud" data-d="Export officiel LEGI de Légifrance (DILA) et ses mises à jour quotidiennes : seules les versions en vigueur sont gardées."><b>Textes de loi</b><small>Légifrance · LEGI</small></button>
+            <span class="flux"></span>
+            <button class="noeud" data-d="Recherche hybride : la question est reformulée en termes juridiques par le modèle, puis un index BM25 français retrouve les articles."><b>Recherche</b><small>BM25 · reformulation</small></button>
+            <span class="flux"></span>
+            <button class="noeud" data-d="Claude rédige la réponse uniquement à partir des articles retrouvés, en citant chacun ; la conversation garde le fil des questions de suivi."><b>Rédaction</b><small>Claude (Anthropic)</small></button>
+            <span class="flux"></span>
+            <button class="noeud" data-d="Chaque citation est comparée aux articles fournis : un article inventé est détecté. Évaluation sur un jeu de questions jamais vu pendant le réglage."><b>Garde-fous</b><small>citations vérifiées · évaluation</small></button>
+          </div>
+        </div>
+        <div class="voie voie-sortie">
+          <div class="noeuds">
+            <button class="noeud noeud-large" data-d="Chaque lundi, GitHub Actions réentraîne le modèle, met à jour le corpus juridique, évalue l'assistant, publie un paquet de service et redéploie le site."><b>Automatisation hebdomadaire</b><small>GitHub Actions · Releases</small></button>
+            <span class="flux"></span>
+            <button class="noeud noeud-large" data-d="Une image Docker sert l'API FastAPI et le site sur Render : une base allégée d'une ligne par entreprise donne un score en quelques millisecondes."><b>Production</b><small>Docker · FastAPI · Render</small></button>
+            <span class="flux"></span>
+            <button class="noeud noeud-large noeud-final" data-d="Vous êtes ici. Chaque requête est mesurée (durée, statut, route), sans adresse IP ni SIREN."><b>acquit-solutions.fr</b><small>vous êtes ici</small></button>
+          </div>
+        </div>
+        <p class="archi-detail" id="archi-detail" aria-live="polite">Touchez une brique pour en savoir plus.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="capot-section">
+    <div class="wrap">
+      <h2>Le serveur, maintenant</h2>
+      <p class="capot-intro">Mesures prises par l'application elle-même, actualisées toutes les 5 secondes. <span id="maj"></span></p>
+      <div class="tableau">
+        <div class="carte carte-large">
+          <p class="carte-titre">Latence p95 et requêtes, 30 dernières minutes</p>
+          <svg class="courbe" id="courbe" viewBox="0 0 600 160" preserveAspectRatio="none" role="img" aria-label="Évolution de la latence et du nombre de requêtes"></svg>
+          <p class="legende"><span class="l-ligne"></span>latence p95 (ms) <span class="l-barre"></span>requêtes par minute <span class="l-max" id="lmax"></span></p>
+        </div>
+        <div class="carte">
+          <p class="carte-titre">Latence de l'API</p>
+          <dl class="mesures">
+            <div><dt>p50</dt><dd data-k="p50">–</dd></div>
+            <div><dt>p95</dt><dd data-k="p95b">–</dd></div>
+            <div><dt>p99</dt><dd data-k="p99">–</dd></div>
+            <div><dt>Erreurs</dt><dd data-k="err">–</dd></div>
+          </dl>
+        </div>
+        <div class="carte carte-large">
+          <p class="carte-titre">Par route (15 dernières minutes)</p>
+          <table class="routes"><thead><tr><th>Route</th><th>Requêtes</th><th>p50</th><th>p95</th></tr></thead><tbody id="routes"><tr><td colspan="4">En attente des premières mesures…</td></tr></tbody></table>
+          <p class="petit">En service depuis <span data-k="uptime">–</span> · version <span data-k="version">–</span></p>
+        </div>
+        <div class="carte">
+          <p class="carte-titre">Ressources</p>
+          <div class="jauge"><span>Mémoire</span><b data-k="mem">–</b><i><em id="jmem"></em></i></div>
+          <div class="jauge"><span>CPU</span><b data-k="cpu">–</b><i><em id="jcpu"></em></i></div>
+          <div class="jauge"><span>Cache</span><b data-k="cache">–</b><i><em id="jcache"></em></i></div>
+          <p class="petit" data-k="instance">–</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="capot-section">
+    <div class="wrap duo">
+      <div>
+        <h2>Le modèle</h2>
+        <p class="capot-intro">Entraîné sur <b data-k="train">–</b> bilans, testé sur <b data-k="test">–</b> bilans de l'année suivante, jamais vus.</p>
+        <div class="compare">
+          <div class="barre-l"><span>LightGBM calibré</span><i><em data-w="auc"></em></i><b data-k="auc2">–</b></div>
+          <div class="barre-l ref"><span>Référence logistique</span><i><em data-w="ref"></em></i><b data-k="ref">–</b></div>
+          <p class="petit">ROC AUC sur l'année de test. 0,5 = hasard, 1 = parfait.</p>
+        </div>
+        <p class="capot-intro">Défaillances réellement observées selon le niveau annoncé :</p>
+        <div class="niveaux" id="niveaux"></div>
+      </div>
+      <div>
+        <h2>L'assistant</h2>
+        <p class="capot-intro">Évalué chaque semaine sur des questions jamais utilisées pour le réglage.</p>
+        <div class="anneaux">
+          <div class="anneau" data-a="reussite"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50"/><circle class="arc" cx="60" cy="60" r="50"/></svg><b>–</b><span>bon article trouvé</span></div>
+          <div class="anneau" data-a="rappel"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50"/><circle class="arc" cx="60" cy="60" r="50"/></svg><b>–</b><span>articles attendus retrouvés</span></div>
+          <div class="anneau" data-a="fidelite"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50"/><circle class="arc" cx="60" cy="60" r="50"/></svg><b>–</b><span>citations fidèles aux textes</span></div>
+        </div>
+        <p class="petit">Modèle de rédaction : <span data-k="llm">–</span> · <span data-k="articles">–</span> articles de loi en vigueur</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="capot-section">
+    <div class="wrap">
+      <h2>Conçu pour tenir</h2>
+      <p class="capot-intro">Ce qui protège le service quand le trafic monte ou qu'une brique tombe.</p>
+      <div class="fiab">
+        <div><b>Cache mémoire</b><p>Les recherches et identités déjà demandées ne refont pas d'appel externe.</p></div>
+        <div><b>Limitation de débit</b><p>Un quota par visiteur protège l'assistant et maîtrise le coût de l'IA.</p></div>
+        <div><b>Dégradation maîtrisée</b><p>Si le modèle de langage ne répond pas, l'assistant renvoie quand même les bons articles de loi.</p></div>
+        <div><b>Ressources bornées</b><p>Threads et mémoire de la base limités : pas d'engorgement sur une petite machine.</p></div>
+        <div><b>Base de service allégée</b><p>Une ligne par entreprise, historique précalculé : scores identiques à l'entraînement, prouvé par un test.</p></div>
+        <div><b>Tests et intégration continue</b><p>Tests automatiques à chaque modification, image Docker reconstruite et vérifiée.</p></div>
+        <div><b>Mises à jour automatiques</b><p>Réentraînement, corpus et évaluation chaque semaine, puis redéploiement sans intervention.</p></div>
+        <div><b>Vie privée</b><p>Aucun cookie, aucune adresse IP ni SIREN conservé dans les mesures.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="capot-section capot-fin">
+    <div class="wrap">
+      <h2>Tout le code est ouvert.</h2>
+      <p class="capot-intro">Conçu et construit de bout en bout par Clément Ferry Mama : données, modèle, assistant, API, infrastructure et produit.</p>
+      <p class="ctas"><a class="btn btn-capot" href="https://github.com/clementmamapro-creator/radar-anti-impayes">Voir le code sur GitHub</a> <a class="lien-capot" href="./#verifier">Essayer Acquit →</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <div class="wrap">
+    <div>
+      <a class="marque" href="./" aria-label="Acquit Solutions, accueil">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M21.5 33.5 L28.5 40.5 L43 25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"/></svg>
+        <span>Acquit <em>Solutions</em></span>
+      </a>
+      <p class="endos">Une marque MCF World. Données : INPI et BODACC (DILA), sous Licence Ouverte.</p>
+    </div>
+    <nav aria-label="Liens de pied de page">
+      <a href="a-propos.html">À propos</a>
+      <a href="sous-le-capot.html">Sous le capot</a>
+      <a href="mentions-legales.html">Mentions légales</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="https://github.com/clementmamapro-creator/radar-anti-impayes">Code source</a>
+    </nav>
+  </div>
+</footer>
+<script src="assets/capot.js?v=20261025b" defer></script>
+<script src="assets/lecture.js?v=20261025b" defer></script>
+</body>
+</html>

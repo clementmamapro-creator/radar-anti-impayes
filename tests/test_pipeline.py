@@ -144,3 +144,33 @@ def test_paquet_de_service_equivalent(cfg, built, tmp_path):
     for siren in bilans["siren"].drop_duplicates().sample(60, random_state=1):
         a, b = full.score(siren), light.score(siren)
         assert (a.statut, a.probabilite, a.niveau) == (b.statut, b.probabilite, b.niveau), siren
+
+
+def test_telemetrie_percentiles_et_fenetre():
+    from radar.telemetrie import Telemetrie, percentile
+
+    assert percentile([], .5) is None
+    assert percentile([10, 20, 30, 40], .5) == 25
+    t = Telemetrie()
+    now = 1_000_000.0
+    for i in range(100):
+        t.enregistrer("/score/{siren}", 200, float(i + 1), t=now - 10)
+    t.enregistrer("/score/{siren}", 500, 5.0, t=now - 5)
+    t.enregistrer("/metriques", 200, 1.0, t=now)       # exclu
+    t.enregistrer("/score/{siren}", 200, 999.0, t=now - 3600)  # hors fenêtre
+    s = t.instantane(maintenant=now)
+    assert s["requetes"] == 101 and s["erreurs_pct"] == round(100 / 101, 2)
+    assert 90 <= s["latence_ms"]["p95"] <= 96
+    assert len(s["minutes"]) == 30 and s["minutes"][-1]["requetes"] == 101
+
+
+def test_endpoint_metriques():
+    from fastapi.testclient import TestClient
+
+    from radar import api
+
+    c = TestClient(api.app)
+    c.get("/health")
+    m = c.get("/metriques").json()
+    assert {"service", "trafic", "cache", "donnees", "modele", "assistant"} <= set(m)
+    assert m["service"]["memoire_mo"] > 0

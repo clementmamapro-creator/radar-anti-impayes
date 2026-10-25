@@ -10,6 +10,7 @@ from pathlib import Path
 import datetime as dt
 import hashlib
 import secrets
+import time
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from pydantic import BaseModel, Field
@@ -18,8 +19,9 @@ from fastapi.staticfiles import StaticFiles
 
 from . import __version__
 from .config import ROOT, load_config
-from .scoring import Scorer, search_companies
+from .scoring import CACHE_STATS, Scorer, search_companies
 from .store import DuckDBStore
+from .telemetrie import TELEMETRIE
 
 SITE_DIR = Path(os.getenv("RADAR_SITE_DIR", ROOT / "site"))
 
@@ -35,6 +37,22 @@ app = FastAPI(
 _origins = [o.strip() for o in os.getenv("RADAR_CORS_ORIGINS", "").split(",") if o.strip()]
 if _origins:
     app.add_middleware(CORSMiddleware, allow_origins=_origins, allow_methods=["GET"], allow_headers=["*"])
+
+
+@app.middleware("http")
+async def mesurer(request: Request, call_next):
+    """Durée et statut de chaque requête, par route (jamais l'adresse IP ni le SIREN)."""
+    debut = time.perf_counter()
+    statut = 500
+    try:
+        reponse = await call_next(request)
+        statut = reponse.status_code
+        return reponse
+    finally:
+        route = request.scope.get("route")
+        chemin = getattr(route, "path", None)
+        nom = chemin if chemin and chemin != "/" else "site"
+        TELEMETRIE.enregistrer(nom, statut, (time.perf_counter() - debut) * 1000)
 
 
 @lru_cache
@@ -102,8 +120,16 @@ def assistant(q: Question, request: Request) -> dict:
         raise HTTPException(status_code=503, detail="L'assistant n'est pas encore disponible.")
     restantes = None
     if a.client is not None:
-        restantes = _consommer(request, load_config().rag["free_daily_quota"])
+        try:
+            restantes = _consommer(request, load_config().rag["free_daily_quota"])
+        except HTTPException:
+            TELEMETRIE.incrementer("assistant_quota_atteint")
+            raise
     res = a.repondre(q.question, [e.model_dump() for e in q.historique]).to_dict()
+    TELEMETRIE.incrementer("assistant_questions")
+    TELEMETRIE.incrementer("assistant_suivis", 1 if q.historique else 0)
+    TELEMETRIE.incrementer("assistant_reponses_redigees", 1 if res.get("genere") else 0)
+    TELEMETRIE.incrementer("assistant_citations_non_fournies", len(res.get("citations_non_fournies") or []))
     res["questions_restantes_aujourdhui"] = restantes
     return res
 
@@ -119,6 +145,67 @@ def health() -> dict:
     return {
         "status": "ok", "version": __version__, "modele_entraine_le": trained, "demo": is_demo(),
         "assistant": {"articles": len(a.articles), "generation": a.client is not None},
+    }
+
+
+@lru_cache
+def _volumes() -> dict:
+    store = get_scorer().store
+    return store.volumes() if hasattr(store, "volumes") else {}
+
+
+def _lire_json(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+@app.get("/metriques")
+def metriques() -> dict:
+    """Indicateurs publics du service, affichés en direct sur la page « Sous le capot »."""
+    cfg = load_config()
+    m = _lire_json(cfg.model_dir / "metrics.json")
+    ev = _lire_json(cfg.model_dir / "rag_eval.json")
+    a = get_assistant()
+    trafic = TELEMETRIE.instantane()
+    retenu = (m.get("metrics") or {}).get("lightgbm_calibre", {})
+    test = ev.get("test", {}).get("hybride", {})
+    gen = ev.get("generation", {})
+    hits = CACHE_STATS["recherche_hits"] + CACHE_STATS["identite_hits"]
+    total = hits + CACHE_STATS["recherche_misses"] + CACHE_STATS["identite_misses"]
+    return {
+        "service": {
+            "version": __version__,
+            "commit": (os.getenv("RENDER_GIT_COMMIT") or "")[:7] or None,
+            "instance": os.getenv("RADAR_INSTANCE", "Render Starter · 0,5 CPU · 512 Mo"),
+            "demo": is_demo(),
+            **TELEMETRIE.processus(),
+        },
+        "trafic": trafic,
+        "cache": {"taux_pct": round(100 * hits / total, 1) if total else None, **CACHE_STATS},
+        "donnees": {**_volumes(), "corpus_articles": len(a.articles)},
+        "modele": {
+            "entraine_le": m.get("entraine_le"),
+            "lignes_entrainement": (m.get("train") or {}).get("lignes"),
+            "lignes_test": (m.get("test") or {}).get("lignes"),
+            "annees_test": (m.get("test") or {}).get("annees"),
+            "roc_auc": retenu.get("roc_auc"),
+            "rappel_top10": retenu.get("recall_top10"),
+            "brier": retenu.get("brier"),
+            "reference_auc": ((m.get("metrics") or {}).get("baseline_logreg") or {}).get("roc_auc"),
+            "niveaux": (m.get("niveaux_actuels") or {}).get("detail"),
+        },
+        "assistant": {
+            "generation": a.client is not None,
+            "modele": cfg.rag.get("model"),
+            "test_reussite_at5": test.get("reussite@5"),
+            "test_rappel_at5": test.get("rappel@5"),
+            "test_mrr": test.get("mrr"),
+            "test_questions": test.get("questions_evaluees"),
+            "taux_citation": gen.get("taux_citation"),
+            "taux_fidelite": gen.get("taux_fidelite"),
+        },
     }
 
 

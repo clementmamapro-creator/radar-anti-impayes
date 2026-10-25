@@ -117,6 +117,7 @@ def level_for(p: float, levels: dict) -> str:
 _CACHE_MAX = 2000
 _search_cache: dict[tuple[str, int], list[dict]] = {}
 _identity_cache: dict[str, dict] = {}
+CACHE_STATS = {"recherche_hits": 0, "recherche_misses": 0, "identite_hits": 0, "identite_misses": 0}
 
 
 def _remember(cache: dict, key, value) -> None:
@@ -129,7 +130,9 @@ def search_companies(cfg: Config, query: str, limit: int = 6, timeout: float = 5
     """Suggestions d'entreprises par nom (API Recherche d'entreprises). Liste vide en cas d'échec."""
     key = (query.strip().lower(), limit)
     if key in _search_cache:
+        CACHE_STATS["recherche_hits"] += 1
         return _search_cache[key]
+    CACHE_STATS["recherche_misses"] += 1
     try:
         r = httpx.get(
             f"{cfg.entreprises['base_url']}/search",
@@ -157,7 +160,9 @@ def search_companies(cfg: Config, query: str, limit: int = 6, timeout: float = 5
 def fetch_identity(cfg: Config, siren: str, timeout: float = 5.0) -> dict | None:
     """Nom, activité et date de création via l'API Recherche d'entreprises (facultatif)."""
     if siren in _identity_cache:
+        CACHE_STATS["identite_hits"] += 1
         return _identity_cache[siren]
+    CACHE_STATS["identite_misses"] += 1
     try:
         r = httpx.get(f"{cfg.entreprises['base_url']}/search", params={"q": siren, "per_page": 1}, timeout=timeout)
         r.raise_for_status()

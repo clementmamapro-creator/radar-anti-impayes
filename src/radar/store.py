@@ -33,6 +33,10 @@ class DuckDBStore:
     def bilans_for(self, siren: str) -> pd.DataFrame:
         return self._query("SELECT * FROM bilans WHERE siren = ? ORDER BY date_cloture", siren)
 
+    def volumes(self) -> dict[str, int]:
+        cur = self.con.cursor()
+        return {t: cur.execute(f"SELECT count(*) FROM {t}").fetchone()[0] for t in ("bilans", "procedures")}
+
     def sample_sirens(self) -> dict[str, list[str]]:
         cur = self.con.cursor()
         latest = """
