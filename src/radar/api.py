@@ -25,7 +25,7 @@ from .store import DuckDBStore
 from .telemetrie import TELEMETRIE
 
 SITE_DIR = Path(os.getenv("RADAR_SITE_DIR", ROOT / "site"))
-PAGES = ("a-propos", "sous-le-capot", "mentions-legales", "confidentialite")
+PAGES = ("a-propos", "sous-le-capot", "mentions-legales", "confidentialite", "penalites-de-retard")
 
 app = FastAPI(
     title="Acquit Solutions API",

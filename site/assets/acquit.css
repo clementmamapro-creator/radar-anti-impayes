@@ -155,7 +155,7 @@ h3 { font-size: 22px; line-height: 1.3; }
 .regle-piste span:nth-child(1) { background: var(--acquit); border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
 .regle-piste span:nth-child(2) { background: var(--vigilance); }
 .regle-piste span:nth-child(3) { background: var(--alerte); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
-.regle-curseur { position: absolute; top: -8px; width: 3px; height: 24px; margin-left: -1.5px; background: var(--encre); transition: left 600ms cubic-bezier(.2,.8,.2,1); }
+.regle-curseur { position: absolute; top: -8px; width: 3px; height: 24px; margin-left: -1.5px; background: var(--encre); transition: left 1100ms cubic-bezier(.2,.8,.2,1) 200ms; }
 .regle-legende { display: flex; justify-content: space-between; font-size: 14px; line-height: 21px; color: var(--ardoise); margin-top: var(--space-2); }
 
 .facteurs { list-style: none; margin: var(--space-6) 0 0; padding: 0; }
@@ -603,3 +603,73 @@ body.page-capot .pied { background: #080E1A; }
 .radar-mois .repere { fill: #FFD9A0; transition: cx 300ms ease, cy 300ms ease; }
 #fcarte .dep { transition: opacity 250ms ease, transform 250ms cubic-bezier(.2,.8,.2,1), fill 350ms ease, filter 250ms ease; }
 .radar-info.flottante { position: absolute; top: 0; left: 0; bottom: auto; pointer-events: none; z-index: 5; box-shadow: 0 12px 32px rgba(0,0,0,.45); transition: transform 60ms linear; }
+
+/* Cascade SHAP sur la fiche : barres qui se construisent une à une */
+.shap { margin: 4px 0 8px; display: grid; gap: 14px; }
+.shap-axe { display: flex; justify-content: space-between; font-size: 12px; color: var(--ardoise); border-bottom: 1px dashed var(--filet); padding-bottom: 4px; }
+.shap-ligne { display: grid; grid-template-columns: 1fr; gap: 4px; }
+.shap-nom { font-size: 14px; font-weight: 600; }
+.shap-piste { position: relative; height: 12px; border-radius: 99px; background: var(--papier); overflow: hidden; }
+.shap-piste::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--bordure); z-index: 1; }
+.shap-piste i { position: absolute; top: 0; bottom: 0; width: 0; transition: width 700ms cubic-bezier(.2,.8,.2,1); transition-delay: var(--d); }
+.shap-ligne.up .shap-piste i { left: 50%; border-radius: 0 99px 99px 0; background: linear-gradient(90deg, #E0A84A, var(--alerte)); }
+.shap-ligne.down .shap-piste i { right: 50%; border-radius: 99px 0 0 99px; background: linear-gradient(270deg, #6FC79D, var(--acquit)); }
+.shap.joue .shap-piste i { width: var(--w); }
+.shap-phrase { font-size: 13.5px; line-height: 1.5; color: var(--ardoise); opacity: 0; transform: translateY(4px); transition: opacity 400ms ease, transform 400ms ease; transition-delay: calc(var(--d) + 300ms); }
+.shap.joue .shap-phrase { opacity: 1; transform: none; }
+.shap-aide { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--bordure); font-size: 11px; color: var(--ardoise); cursor: help; margin-left: 6px; position: relative; vertical-align: 1px; }
+.shap-aide:hover::after, .shap-aide:focus::after {
+  content: attr(aria-label); position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); width: 260px;
+  background: var(--encre); color: var(--papier); font-size: 12.5px; line-height: 1.5; font-weight: 400; padding: 8px 10px; border-radius: 8px; z-index: 10; text-align: left;
+}
+@media (prefers-reduced-motion: reduce) { .shap-piste i, .shap-phrase { transition: none; } }
+
+/* ===== Calculateur de pénalités de retard ===== */
+.calc-hero { padding: 64px 0 24px; }
+.calc-sur { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--acquit); font-weight: 600; margin: 0 0 12px; }
+.calc-hero h1 { max-width: 18em; }
+.calc-zone { padding: 16px 0 64px; }
+.calc-grille { display: grid; grid-template-columns: 1fr 1.1fr; gap: 32px; align-items: start; }
+@media (max-width: 860px) { .calc-grille { grid-template-columns: 1fr; } }
+.calc-form { display: grid; gap: 8px; background: var(--feuille); border: 1px solid var(--filet); border-radius: 16px; padding: 24px; }
+.calc-form label { font-weight: 600; font-size: 14px; margin-top: 10px; }
+.calc-form label:first-child { margin-top: 0; }
+.calc-form small { font-weight: 400; color: var(--ardoise); }
+.calc-form input { font: inherit; font-size: 17px; color: var(--encre); background: var(--papier); border: 1px solid var(--bordure); border-radius: 10px; padding: 12px 14px; width: 100%; }
+.calc-form input:focus { outline: none; border-color: var(--acquit); box-shadow: 0 0 0 3px var(--acquit-voile); }
+.calc-champ { position: relative; }
+.calc-champ input { padding-right: 70px; }
+.calc-champ span { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ardoise); font-size: 14px; }
+.calc-erreur { color: var(--alerte); font-size: 14px; margin: 6px 0 0; }
+.calc-erreur[hidden] { display: none; }
+.calc-resultat { position: sticky; top: 96px; background: #0B1220; color: #E8EDF5; border-radius: 16px; padding: 28px; box-shadow: var(--shadow-fiche); }
+.calc-etiquette { margin: 0; color: #93A0B8; font-size: 14px; }
+.calc-total { margin: 4px 0 18px; font-family: var(--serif); font-size: clamp(42px, 6vw, 60px); line-height: 1.05; font-variant-numeric: tabular-nums;
+  background: linear-gradient(90deg, #7CE0B0, #F2A33A); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.calc-decomp { display: grid; gap: 8px; margin-bottom: 14px; }
+.calc-decomp div { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+.calc-decomp span { color: #93A0B8; }
+.calc-decomp b { font-variant-numeric: tabular-nums; font-weight: 600; }
+.calc-jours { border-top: 1px solid #22304A; padding-top: 8px; }
+.calc-barre { width: 100%; height: 14px; display: block; margin: 6px 0 16px; }
+.calc-barre .b-pen { fill: #F2A33A; transition: width 400ms ease; }
+.calc-barre .b-ind { fill: #7CE0B0; }
+.calc-detail { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-bottom: 10px; }
+.calc-detail th { text-align: left; color: #93A0B8; font-weight: 500; border-bottom: 1px solid #22304A; padding: 6px 4px; }
+.calc-detail td { padding: 6px 4px; border-bottom: 1px solid #22304A; font-variant-numeric: tabular-nums; }
+.calc-formule { font-size: 13px; color: #93A0B8; line-height: 1.5; margin: 0 0 16px; }
+.calc-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.calc-actions .btn { min-height: 44px; }
+.calc-resultat .btn:not(.btn-principal) { color: #E8EDF5; border-color: #3A4A68; background: transparent; }
+.calc-resultat .btn-principal { background: #7CE0B0; border-color: #7CE0B0; color: #06110C; }
+.calc-schema { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 8px 0 32px; }
+.calc-schema div { background: var(--feuille); border: 1px solid var(--filet); border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; min-width: 130px; }
+.calc-schema b { font-size: 16px; }
+.calc-schema span { font-size: 13px; color: var(--ardoise); }
+.calc-schema i { font-style: normal; font-size: 22px; color: var(--ardoise); }
+.calc-schema-fixe { border-color: var(--acquit) !important; }
+.calc-faq { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 32px; margin: 0; }
+@media (max-width: 760px) { .calc-faq { grid-template-columns: 1fr; } }
+.calc-faq dt { font-weight: 600; margin-bottom: 4px; }
+.calc-faq dd { margin: 0; color: var(--ardoise); line-height: 1.6; }
+.calc-note { font-size: 13px; color: var(--ardoise); margin: 28px 0 0; }

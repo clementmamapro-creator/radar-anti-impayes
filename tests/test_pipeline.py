@@ -234,3 +234,12 @@ def test_adresses_propres_des_pages():
     assert r.status_code == 200 and "À propos" in r.text
     r = c.get("/a-propos.html", follow_redirects=False)
     assert r.status_code == 301 and r.headers["location"] == "/a-propos"
+
+
+def test_page_calculateur_servie():
+    from fastapi.testclient import TestClient
+
+    from radar import api
+
+    r = TestClient(api.app).get("/penalites-de-retard")
+    assert r.status_code == 200 and "pénalités de retard" in r.text.lower()

@@ -60,10 +60,17 @@
         '<div class="regle-piste"><span></span><span></span><span></span><i class="regle-curseur" style="left:0%"></i></div>' +
         '<div class="regle-legende"><span>Risque estimé à 12 mois</span><span>' + pct(r.probabilite) + "</span></div></div>";
       if (r.facteurs && r.facteurs.length) {
-        h += '<p class="fiche-titre-bloc">Ce qui pèse le plus</p><ul class="facteurs">' + r.facteurs.map(function (f) {
-          var up = f.effet === "augmente";
-          return '<li><span class="signe ' + (up ? "up" : "down") + '" aria-hidden="true">' + (up ? "+" : "−") + "</span><span>" + esc(f.phrase) + "</span></li>";
-        }).join("") + "</ul>";
+        // Cascade SHAP : chaque facteur pousse le risque vers le haut (droite) ou vers le bas (gauche)
+        var maxp = Math.max.apply(null, r.facteurs.map(function (f) { return Math.abs(f.poids || 0); }).concat([1e-9]));
+        h += '<p class="fiche-titre-bloc">Ce qui pèse le plus <span class="shap-aide" tabindex="0" aria-label="Méthode SHAP : chaque barre montre de combien ce facteur pousse le risque de cette entreprise vers le haut ou vers le bas, par rapport à une entreprise moyenne.">?</span></p>' +
+          '<div class="shap" role="list"><div class="shap-axe"><span>réduit le risque</span><span>augmente le risque</span></div>' +
+          r.facteurs.map(function (f, i) {
+            var up = f.effet === "augmente", w = Math.max(8, Math.round(48 * Math.abs(f.poids || maxp) / maxp));
+            return '<div class="shap-ligne ' + (up ? "up" : "down") + '" role="listitem" style="--w:' + w + '%;--d:' + (250 + i * 380) + 'ms">' +
+              '<span class="shap-nom">' + esc(majuscule(f.libelle || "")) + "</span>" +
+              '<span class="shap-piste"><i></i></span>' +
+              '<span class="shap-phrase">' + esc(f.phrase) + "</span></div>";
+          }).join("") + "</div>";
       }
     }
     if (r.procedures && r.procedures.length) {
@@ -82,8 +89,11 @@
 
   function afficher(r, opts) {
     fiche.innerHTML = fichHtml(r, opts);
-    var c = fiche.querySelector(".regle-curseur");
-    if (c) requestAnimationFrame(function () { requestAnimationFrame(function () { c.style.left = position(r.probabilite) + "%"; }); });
+    var c = fiche.querySelector(".regle-curseur"), shap = fiche.querySelector(".shap");
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      if (shap) shap.classList.add("joue");          // les barres se construisent une à une
+      if (c) c.style.left = position(r.probabilite) + "%";
+    }); });
   }
 
   var EXEMPLE = {
@@ -92,9 +102,9 @@
     identite: { nom: "Menuiserie des Coteaux" },
     recommandation: { titre: "Demandez un acompte", texte: "Demandez un acompte d'environ 30 % à la signature et un paiement du solde à 15 jours." },
     facteurs: [
-      { effet: "augmente", phrase: "Le taux d'endettement : au-dessus de la médiane des entreprises, ce qui augmente le risque." },
-      { effet: "augmente", phrase: "Le délai de paiement de ses fournisseurs : au-dessus de la médiane des entreprises, ce qui augmente le risque." },
-      { effet: "réduit", phrase: "La marge d'exploitation (EBE) : au-dessus de la médiane des entreprises, ce qui réduit le risque." }
+      { effet: "augmente", poids: 0.62, libelle: "le taux d'endettement", phrase: "Le taux d'endettement : au-dessus de la médiane des entreprises, ce qui augmente le risque." },
+      { effet: "augmente", poids: 0.38, libelle: "le délai de paiement des fournisseurs", phrase: "Le délai de paiement de ses fournisseurs : au-dessus de la médiane des entreprises, ce qui augmente le risque." },
+      { effet: "réduit", poids: -0.27, libelle: "la marge d'exploitation (EBE)", phrase: "La marge d'exploitation (EBE) : au-dessus de la médiane des entreprises, ce qui réduit le risque." }
     ],
     procedures: [],
     avertissement: "Risque estimé à partir des données publiques. Ce score est une aide à la décision, pas un jugement sur l'entreprise."

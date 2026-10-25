@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calcul des pénalités de retard de paiement (2026) · Acquit Solutions</title>
+<meta name="description" content="Calculez gratuitement les pénalités de retard et l'indemnité forfaitaire de 40 € d'une facture impayée entre professionnels, au taux légal en vigueur (BCE + 10 points), avec les articles de loi.">
+<link rel="canonical" href="https://acquit-solutions.fr/penalites-de-retard">
+<link rel="icon" href="assets/acquit-tampon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/acquit.css?v=20261025i">
+<script defer src="https://cloud.umami.is/script.js" data-website-id="48bad13f-c477-4195-9fd3-00dcf9cde7f7" data-domains="acquit-solutions.fr,www.acquit-solutions.fr"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculateur de pénalités de retard","url":"https://acquit-solutions.fr/penalites-de-retard","applicationCategory":"FinanceApplication","operatingSystem":"Web","inLanguage":"fr","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"publisher":{"@type":"Organization","name":"Acquit Solutions"}}</script>
+</head>
+<body>
+<header class="entete">
+  <div class="wrap">
+    <a class="marque" href="./" aria-label="Acquit Solutions, accueil">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M21.5 33.5 L28.5 40.5 L43 25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"/></svg>
+      <span>Acquit <em>Solutions</em></span>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="./#assistant">Assistant</a>
+      <a href="penalites-de-retard">Calculateur</a>
+      <a href="./#methode">Méthode</a>
+      <a href="./#tarifs">Tarifs</a>
+      <a href="a-propos">À propos</a>
+      <a class="btn btn-principal" href="./#verifier">Vérifier un client</a>
+    </nav>
+    <a class="nav-court" href="./#verifier">Vérifier un client</a>
+  </div>
+</header>
+
+<main class="calc-page" id="contenu">
+  <section class="calc-hero">
+    <div class="wrap">
+      <p class="calc-sur">Outil gratuit · entre professionnels</p>
+      <h1>Combien réclamer pour une facture payée en retard ?</h1>
+      <p class="chapeau">Pénalités de retard et indemnité forfaitaire de 40 €, au taux légal en vigueur, avec les articles de loi. Le calcul se fait dans votre navigateur : rien n'est envoyé.</p>
+    </div>
+  </section>
+
+  <section class="calc-zone">
+    <div class="wrap calc-grille">
+      <form class="calc-form" id="calc" novalidate>
+        <label for="c-montant">Montant de la facture (TTC)</label>
+        <div class="calc-champ"><input id="c-montant" type="number" inputmode="decimal" min="0" step="0.01" value="2500"><span>€</span></div>
+
+        <label for="c-echeance">Date d'échéance indiquée sur la facture</label>
+        <input id="c-echeance" type="date">
+
+        <label for="c-paiement">Date de paiement <small>(aujourd'hui si toujours impayée)</small></label>
+        <input id="c-paiement" type="date">
+
+        <label for="c-taux">Taux prévu dans vos conditions de vente <small>(facultatif)</small></label>
+        <div class="calc-champ"><input id="c-taux" type="number" inputmode="decimal" min="0" step="0.01" placeholder="taux légal par défaut"><span>% / an</span></div>
+        <p class="calc-erreur" id="c-erreur" role="alert" hidden></p>
+      </form>
+
+      <div class="calc-resultat" aria-live="polite">
+        <p class="calc-etiquette">Vous pouvez réclamer</p>
+        <p class="calc-total" id="r-total">–</p>
+        <div class="calc-decomp">
+          <div><span>Pénalités de retard</span><b id="r-penalites">–</b></div>
+          <div><span>Indemnité forfaitaire de recouvrement</span><b id="r-indemnite">40,00 €</b></div>
+          <div class="calc-jours"><span>Jours de retard</span><b id="r-jours">–</b></div>
+        </div>
+        <svg class="calc-barre" id="r-barre" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <table class="calc-detail" id="r-detail"></table>
+        <p class="calc-formule" id="r-formule"></p>
+        <div class="calc-actions">
+          <button type="button" class="btn btn-principal" id="r-copier">Copier le détail pour ma relance</button>
+          <a class="btn" href="./#assistant">Demander à l'assistant →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section calc-explications">
+    <div class="wrap">
+      <h2>Comment est fait le calcul</h2>
+      <div class="calc-schema" aria-hidden="true">
+        <div><b>Montant TTC</b><span>la somme due</span></div><i>×</i>
+        <div><b>Taux annuel</b><span>BCE + 10 points</span></div><i>×</i>
+        <div><b>Jours de retard</b><span>÷ 365</span></div><i>+</i>
+        <div class="calc-schema-fixe"><b>40 €</b><span>par facture</span></div>
+      </div>
+      <dl class="calc-faq">
+        <div><dt>Quel taux s'applique ?</dt><dd>Sauf taux prévu dans vos conditions de vente, c'est le taux de refinancement de la Banque centrale européenne majoré de 10 points : celui du 1er janvier pour le premier semestre, celui du 1er juillet pour le second. Un taux contractuel ne peut pas être inférieur à trois fois le taux d'intérêt légal. <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000038414392" target="_blank" rel="noopener">Code de commerce, art. L441-10</a></dd></div>
+        <div><dt>Faut-il envoyer un rappel avant ?</dt><dd>Non : les pénalités sont exigibles dès le lendemain de l'échéance, sans rappel. <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000038414392" target="_blank" rel="noopener">Art. L441-10</a></dd></div>
+        <div><dt>Et les 40 € ?</dt><dd>Tout professionnel qui paie en retard doit de plein droit une indemnité forfaitaire de 40 € pour frais de recouvrement, par facture. Si vos frais réels sont plus élevés, vous pouvez demander davantage sur justificatif. <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043197457" target="_blank" rel="noopener">Code de commerce, art. D441-5</a></dd></div>
+        <div><dt>Y a-t-il des exceptions ?</dt><dd>Oui : si votre client est en sauvegarde, en redressement ou en liquidation judiciaire, vous ne pouvez pas réclamer ces sommes ; déclarez plutôt votre créance. Ce calcul concerne les relations entre professionnels, pas les particuliers.</dd></div>
+      </dl>
+      <p class="calc-note">Taux de référence : <span id="r-taux-liste"></span>. Information générale, pas un conseil juridique personnalisé.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <div class="wrap">
+    <div>
+      <a class="marque" href="./" aria-label="Acquit Solutions, accueil">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="32" cy="32" r="23" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M21.5 33.5 L28.5 40.5 L43 25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"/></svg>
+        <span>Acquit <em>Solutions</em></span>
+      </a>
+      <p class="endos">Une marque MCF World. Données : INPI et BODACC (DILA), sous Licence Ouverte.</p>
+    </div>
+    <nav aria-label="Liens de pied de page">
+      <a href="a-propos">À propos</a>
+      <a href="penalites-de-retard">Calcul des pénalités</a>
+      <a href="sous-le-capot">Sous le capot</a>
+      <a href="mentions-legales">Mentions légales</a>
+      <a href="confidentialite">Confidentialité</a>
+      <a href="https://github.com/clementmamapro-creator/radar-anti-impayes">Code source</a>
+    </nav>
+  </div>
+</footer>
+<script src="assets/calculateur.js?v=20261025i" defer></script>
+<script src="assets/lecture.js?v=20261025i" defer></script>
+</body>
+</html>
