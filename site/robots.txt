@@ -1,0 +1,7 @@
+# Acquit Solutions : tout le site est public et peut être indexé, y compris par les moteurs de réponse IA.
+User-agent: *
+Allow: /
+Disallow: /metriques
+Disallow: /assistant
+
+Sitemap: https://acquit-solutions.fr/sitemap.xml

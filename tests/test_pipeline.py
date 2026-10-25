@@ -243,3 +243,14 @@ def test_page_calculateur_servie():
 
     r = TestClient(api.app).get("/penalites-de-retard")
     assert r.status_code == 200 and "pénalités de retard" in r.text.lower()
+
+
+def test_fichiers_de_referencement():
+    from fastapi.testclient import TestClient
+
+    from radar import api
+
+    c = TestClient(api.app)
+    for f in ("/robots.txt", "/sitemap.xml", "/llms.txt"):
+        assert c.get(f).status_code == 200
+    assert "Sitemap:" in c.get("/robots.txt").text

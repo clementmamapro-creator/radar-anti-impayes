@@ -1,0 +1,25 @@
+# Acquit Solutions
+
+> Outil gratuit et open source pour les artisans et les TPE françaises : avant d'envoyer un devis, il estime le risque de défaillance d'un futur client à partir des données publiques (comptes annuels INPI, annonces BODACC) et recommande les conditions de paiement à exiger (paiement à 30 jours, acompte de 30 %, 50 % à la commande). Il comprend aussi un assistant juridique sur les impayés, qui répond à partir des textes de loi officiels (Légifrance) en citant chaque article, et un calculateur de pénalités de retard.
+
+Acquit Solutions est une marque de MCF World. Le score est une estimation statistique, une aide à la décision, jamais un jugement sur une entreprise. Aucun compte n'est nécessaire.
+
+## Outils
+
+- [Vérifier un client](https://acquit-solutions.fr/#verifier) : niveau de risque à 12 mois (faible, modéré, élevé), les 3 facteurs qui pèsent le plus, les procédures collectives publiées, la recommandation de paiement.
+- [Calculateur de pénalités de retard](https://acquit-solutions.fr/penalites-de-retard) : pénalités au taux légal (taux de refinancement BCE + 10 points, par semestre) et indemnité forfaitaire de 40 € (articles L441-10 et D441-5 du Code de commerce).
+- [Assistant impayés](https://acquit-solutions.fr/#assistant) : réponses sourcées sur les délais de paiement, la mise en demeure, l'injonction de payer, la déclaration de créance ; 3 questions gratuites par jour.
+- [Carte des procédures collectives](https://acquit-solutions.fr/#france) : jugements d'ouverture publiés au BODACC par département sur 12 mois et 24 mois d'historique.
+
+## Données et méthode
+
+- Sources : BODACC (DILA) et ratios financiers INPI/BCE, sous Licence Ouverte ; textes de loi : export LEGI de Légifrance.
+- Modèle : LightGBM calibré, entraîné sur 5,7 millions de bilans, testé sur l'année suivante (ROC AUC 0,825) ; explications par SHAP.
+- [Sous le capot](https://acquit-solutions.fr/sous-le-capot) : architecture, métriques en direct, évaluation du modèle et de l'assistant.
+- [Code source](https://github.com/clementmamapro-creator/radar-anti-impayes) : licence AGPL-3.0.
+
+## Informations
+
+- [À propos](https://acquit-solutions.fr/a-propos)
+- [Confidentialité](https://acquit-solutions.fr/confidentialite) : aucun cookie, aucune donnée personnelle demandée.
+- Contact : contact@acquit-solutions.fr
