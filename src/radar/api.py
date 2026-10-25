@@ -180,8 +180,8 @@ def metriques() -> dict:
     retenu = (m.get("metrics") or {}).get("lightgbm_calibre", {})
     test = ev.get("test", {}).get("hybride", {})
     gen = ev.get("generation", {})
-    hits = CACHE_STATS["recherche_hits"] + CACHE_STATS["identite_hits"]
-    total = hits + CACHE_STATS["recherche_misses"] + CACHE_STATS["identite_misses"]
+    hits = sum(v for k, v in CACHE_STATS.items() if k.endswith("_hits"))
+    total = hits + sum(v for k, v in CACHE_STATS.items() if k.endswith("_misses"))
     return {
         "service": {
             "version": __version__,
@@ -217,6 +217,17 @@ def metriques() -> dict:
     }
 
 
+@app.get("/carte")
+def carte_defaillances() -> dict:
+    """Ouvertures de procédures collectives par département, 12 derniers mois (BODACC)."""
+    from .carte import carte
+
+    data = carte(load_config())
+    if data is None:
+        raise HTTPException(status_code=503, detail="Carte momentanément indisponible.")
+    return data
+
+
 @app.get("/exemples")
 def exemples() -> list[dict]:
     """SIREN d'exemple pour la démonstration (uniquement en mode démo)."""
@@ -236,12 +247,30 @@ def recherche(q: str = Query(min_length=2, max_length=100)) -> list[dict]:
     return search_companies(load_config(), q)
 
 
+# Cache des scores complets : les données et le modèle ne changent qu'une fois par
+# semaine (et chaque mise à jour redémarre le service, donc vide ce cache).
+# Le test de charge a montré que le calcul (modèle + SHAP) sature le CPU vers 27 req/s.
+_SCORES: dict[str, dict] = {}
+_SCORES_MAX = 5000
+
+
 @app.get("/score/{siren}")
 def score(siren: str) -> dict:
     digits = "".join(c for c in siren if c.isdigit())
     if len(digits) != 9:
         raise HTTPException(status_code=422, detail="Un SIREN comporte 9 chiffres.")
-    return get_scorer().score(digits).to_dict()
+    if digits in _SCORES:
+        CACHE_STATS["score_hits"] = CACHE_STATS.get("score_hits", 0) + 1
+        return _SCORES[digits]
+    CACHE_STATS["score_misses"] = CACHE_STATS.get("score_misses", 0) + 1
+    scorer = get_scorer()
+    res = scorer.score(digits).to_dict()
+    # On ne fige pas un résultat dont l'identité a échoué (panne passagère de l'API publique)
+    if res.get("identite") is not None or not scorer.with_identity:
+        if len(_SCORES) >= _SCORES_MAX:
+            _SCORES.pop(next(iter(_SCORES)))
+        _SCORES[digits] = res
+    return res
 
 
 @app.get("/model")

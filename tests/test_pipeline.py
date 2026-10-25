@@ -174,3 +174,48 @@ def test_endpoint_metriques():
     m = c.get("/metriques").json()
     assert {"service", "trafic", "cache", "donnees", "modele", "assistant"} <= set(m)
     assert m["service"]["memoire_mo"] > 0
+
+
+def test_carte_calcul_et_evolution(monkeypatch):
+    import datetime as dt
+
+    from radar import carte
+    from radar.config import load_config
+
+    appels = []
+
+    def faux(cfg, params):
+        appels.append(params)
+        if "group_by" in params and params["group_by"] == "numerodepartement":
+            recent = ">=date'2025-10-01'" in params["where"]
+            return [{"numerodepartement": "75", "n": 120 if recent else 100}, {"numerodepartement": "13", "n": 50}]
+        return [{"mois": "2026-09", "n": 10}]
+
+    monkeypatch.setattr(carte, "_records", faux)
+    r = carte.calculer(load_config(), aujourd_hui=dt.date(2026, 10, 25))
+    assert r["periode"] == {"debut": "2025-10-01", "fin": "2026-09-30"}
+    assert r["departements"]["75"] == {"n": 120, "evolution_pct": 20.0}
+    assert r["total"] == 170 and r["mensuel"] == [{"mois": "2026-09", "n": 10}]
+
+
+def test_cache_des_scores(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from radar import api
+
+    appels = []
+
+    class FauxScorer:
+        with_identity = False
+
+        def score(self, siren):
+            appels.append(siren)
+            from radar.scoring import Resultat
+            return Resultat(siren, "donnees_insuffisantes")
+
+    monkeypatch.setattr(api, "get_scorer", lambda: FauxScorer())
+    api._SCORES.clear()
+    c = TestClient(api.app)
+    a = c.get("/score/123456789").json()
+    b = c.get("/score/123 456 789").json()
+    assert a == b and appels == ["123456789"]  # second appel servi par le cache
