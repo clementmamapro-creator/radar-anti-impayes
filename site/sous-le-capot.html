@@ -167,7 +167,8 @@
           <ol class="charge-recit">
             <li><b>Diagnostic.</b> Au-delà de 10 utilisateurs, le débit plafonne (<span data-c="avant">–</span> req/s) et la latence grimpe : le CPU (0,5 cœur) sature sur le calcul du modèle et des explications SHAP.</li>
             <li><b>Remède ciblé.</b> Les scores ne changent qu'une fois par semaine : on garde les réponses déjà calculées en mémoire.</li>
-            <li><b>Résultat.</b> <span data-c="apres">mesure en cours</span>.</li>
+            <li><b>Résultat.</b> <span data-c="apres">mesure en cours</span>. Le débit ne plafonne plus : la limite est désormais au-delà de 40 utilisateurs simultanés.</li>
+            <li><b>Honnêteté.</b> Le test réutilise 10 entreprises, le cas le plus favorable au cache. Avec des entreprises toutes différentes, le gain serait moindre : la prochaine étape serait de précalculer les scores chaque semaine ou d'ajouter des instances.</li>
           </ol>
         </div>
       </div>
