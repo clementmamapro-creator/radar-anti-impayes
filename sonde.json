@@ -1,0 +1,51 @@
+{
+ "/": {
+  "status": 200,
+  "octets": 18850
+ },
+ "/penalites-de-retard": {
+  "status": 200,
+  "octets": 8383
+ },
+ "/a-propos": {
+  "status": 200,
+  "octets": 4725
+ },
+ "/a-propos.html": {
+  "status": 301,
+  "octets": 0,
+  "vers": "/a-propos"
+ },
+ "/sous-le-capot": {
+  "status": 200,
+  "octets": 15943
+ },
+ "/robots.txt": {
+  "status": 200,
+  "octets": 225
+ },
+ "/sitemap.xml": {
+  "status": 200,
+  "octets": 710
+ },
+ "/llms.txt": {
+  "status": 200,
+  "octets": 2387
+ },
+ "/adresse-inexistante": {
+  "status": 404,
+  "octets": 3960
+ },
+ "/carte": {
+  "status": 200,
+  "octets": 13124,
+  "total": 76325,
+  "series": 102,
+  "mois": 24
+ },
+ "/metriques": {
+  "status": 200,
+  "octets": 2570,
+  "commit": "d411fda"
+ }
+}
