@@ -1,0 +1,33 @@
+name: Test de charge
+
+# Lancé à la main (onglet Actions) ou en modifiant .github/charge-trigger
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/charge-trigger"]
+
+permissions:
+  contents: write
+
+jobs:
+  charge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install httpx
+      - name: Test de charge sur acquit-solutions.fr
+        run: python scripts/test_charge.py https://acquit-solutions.fr /tmp/charge.json
+      - name: Publier le résultat sur la branche charge-results
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          mkdir /tmp/pub && cd /tmp/pub
+          git init -q && git checkout -q -b charge-results
+          cp /tmp/charge.json .
+          git -c user.name="github-actions" -c user.email="actions@github.com" add charge.json
+          git -c user.name="github-actions" -c user.email="actions@github.com" commit -q -m "Test de charge ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" charge-results
