@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/acquit.css?v=20261025c">
+<link rel="stylesheet" href="assets/acquit.css?v=20261025d">
 <script defer src="https://cloud.umami.is/script.js" data-website-id="48bad13f-c477-4195-9fd3-00dcf9cde7f7" data-domains="acquit-solutions.fr,www.acquit-solutions.fr"></script>
 </head>
 <body>
@@ -74,15 +74,22 @@
       <div class="radar-texte">
         <p class="radar-sur"><span class="direct"><i></i>Données publiques</span></p>
         <h2 id="titre-france">Chaque jour, des entreprises cessent de payer.</h2>
-        <p class="radar-total"><b id="ftotal">–</b> <span>jugements d'ouverture de procédures collectives publiés au BODACC ces 12 derniers mois</span></p>
+        <p class="radar-total"><b id="ftotal">–</b> <span id="ftotallib">jugements d'ouverture de procédures collectives publiés au BODACC ces 12 derniers mois</span></p>
         <p class="radar-evol" id="fevol"></p>
         <svg class="radar-mois" id="fmois" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true"></svg>
-        <p class="radar-note">Survolez un département. Source : BODACC, mis à jour automatiquement.</p>
+        <p class="radar-note">Survolez un département, ou lancez la lecture pour voir 24 mois défiler. Source : BODACC, mis à jour automatiquement.</p>
         <a class="btn btn-radar" href="#verifier">Vérifier mon client →</a>
       </div>
       <div class="radar-carte">
         <svg id="fcarte" role="img" aria-label="Carte de France des procédures collectives par département"></svg>
         <div class="radar-info" id="finfo" hidden></div>
+        <div class="radar-lecteur" id="flecteur" hidden>
+          <button type="button" class="radar-play" id="fplay" aria-label="Lire l'évolution mois par mois"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-play" d="M8 5v14l11-7z"/><path class="i-pause" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+          <div class="radar-piste">
+            <input type="range" id="fcurseur" min="0" max="23" value="23" aria-label="Choisir un mois">
+            <p><span id="fmoislib">12 derniers mois</span><button type="button" class="radar-an actif" id="fan">Cumul 12 mois</button></p>
+          </div>
+        </div>
         <div class="radar-legende" id="flegende"></div>
       </div>
     </div>
@@ -262,8 +269,8 @@
   </div>
 </footer>
 
-<script src="assets/app.js?v=20261025c"></script>
-<script src="assets/carte.js?v=20261025c" defer></script>
-<script src="assets/lecture.js?v=20261025c" defer></script>
+<script src="assets/app.js?v=20261025d"></script>
+<script src="assets/carte.js?v=20261025d" defer></script>
+<script src="assets/lecture.js?v=20261025d" defer></script>
 </body>
 </html>

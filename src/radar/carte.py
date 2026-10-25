@@ -48,6 +48,20 @@ def _mensuel(cfg: Config, debut: dt.date, fin: dt.date) -> list[dict]:
     return [{"mois": r["mois"], "n": r["n"]} for r in rows if r.get("mois")]
 
 
+def _series(cfg: Config, debut: dt.date, fin: dt.date) -> dict[str, dict[str, int]]:
+    """Nombre de jugements d'ouverture par département et par mois."""
+    rows = _records(cfg, {
+        "select": "count(*) as n",
+        "where": f"{FILTRE} and dateparution>=date'{debut}' and dateparution<date'{fin}'",
+        "group_by": "numerodepartement, date_format(dateparution, 'yyyy-MM') as mois", "limit": -1,
+    })
+    out: dict[str, dict[str, int]] = {}
+    for r in rows:
+        if r.get("numerodepartement") and r.get("mois"):
+            out.setdefault(r["numerodepartement"], {})[r["mois"]] = r["n"]
+    return out
+
+
 def calculer(cfg: Config, aujourd_hui: dt.date | None = None) -> dict:
     j = aujourd_hui or dt.date.today()
     fin = j.replace(day=1)                       # mois complets uniquement
@@ -63,6 +77,12 @@ def calculer(cfg: Config, aujourd_hui: dt.date | None = None) -> dict:
         mensuel = _mensuel(cfg, avant, fin)
     except httpx.HTTPError:
         mensuel = []
+    mois = [m["mois"] for m in mensuel]
+    try:
+        brut = _series(cfg, avant, fin)
+        series = {d: [v.get(m, 0) for m in mois] for d, v in brut.items()}
+    except httpx.HTTPError:
+        series = {}
     total, total_prec = sum(actuel.values()), sum(precedent.values())
     return {
         "periode": {"debut": str(debut), "fin": str(fin - dt.timedelta(days=1))},
@@ -70,6 +90,8 @@ def calculer(cfg: Config, aujourd_hui: dt.date | None = None) -> dict:
         "evolution_pct": round(100 * (total - total_prec) / total_prec, 1) if total_prec else None,
         "departements": departements,
         "mensuel": mensuel,
+        "mois": mois,
+        "series": series,  # par département, aligné sur "mois" (24 mois)
         "source": "BODACC (DILA), jugements d'ouverture de procédures collectives, Licence Ouverte",
         "calcule_le": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }

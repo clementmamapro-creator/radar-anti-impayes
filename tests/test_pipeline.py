@@ -189,13 +189,16 @@ def test_carte_calcul_et_evolution(monkeypatch):
         if "group_by" in params and params["group_by"] == "numerodepartement":
             recent = ">=date'2025-10-01'" in params["where"]
             return [{"numerodepartement": "75", "n": 120 if recent else 100}, {"numerodepartement": "13", "n": 50}]
-        return [{"mois": "2026-09", "n": 10}]
+        if "numerodepartement, date_format" in params.get("group_by", ""):
+            return [{"numerodepartement": "75", "mois": "2026-09", "n": 7}]
+        return [{"mois": "2026-08", "n": 9}, {"mois": "2026-09", "n": 10}]
 
     monkeypatch.setattr(carte, "_records", faux)
     r = carte.calculer(load_config(), aujourd_hui=dt.date(2026, 10, 25))
     assert r["periode"] == {"debut": "2025-10-01", "fin": "2026-09-30"}
     assert r["departements"]["75"] == {"n": 120, "evolution_pct": 20.0}
-    assert r["total"] == 170 and r["mensuel"] == [{"mois": "2026-09", "n": 10}]
+    assert r["total"] == 170 and r["mois"] == ["2026-08", "2026-09"]
+    assert r["series"] == {"75": [0, 7]}
 
 
 def test_cache_des_scores(monkeypatch):
