@@ -71,6 +71,29 @@
       info.hidden = false;
     }
 
+    // Sur ordinateur, l'info-bulle suit la souris et ne bloque jamais les clics (pointer-events: none).
+    // Sur écran tactile, elle s'affiche sous la carte et se ferme en touchant ailleurs.
+    var souris = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    var zone = svg.parentNode;
+    if (souris) info.classList.add("flottante");
+    function suivre(e) {
+      if (!souris || info.hidden) return;
+      var r = zone.getBoundingClientRect(), w = info.offsetWidth, h = info.offsetHeight;
+      var x = e.clientX - r.left + 18, y = e.clientY - r.top + 18;
+      if (x + w > r.width) x = e.clientX - r.left - w - 18;   // bascule à gauche du curseur près du bord
+      if (y + h > r.height) y = e.clientY - r.top - h - 18;
+      info.style.transform = "translate(" + Math.max(0, x) + "px," + Math.max(0, y) + "px)";
+    }
+    function cacher() {
+      if (!souris) return;
+      etat.survol = null;
+      info.hidden = true;
+    }
+    document.addEventListener("click", function (e) {
+      if (!zone.contains(e.target) || e.target === svg) { etat.survol = null; info.hidden = true; }
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { etat.survol = null; info.hidden = true; } });
+
     function colorer() {
       var s = etat.idx == null ? seuilsAn : seuilsMois;
       codes.forEach(function (c) { chemins[c].setAttribute("class", "dep c" + classe(valeur(c), s)); });
@@ -97,7 +120,10 @@
       function survol() { montrer(code); groupe.appendChild(path); }
       path.addEventListener("mouseenter", survol);
       path.addEventListener("focus", survol);
-      path.addEventListener("click", survol);
+      path.addEventListener("click", function (e) { e.stopPropagation(); survol(); suivre(e); });
+      path.addEventListener("mousemove", suivre);
+      path.addEventListener("mouseleave", cacher);
+      path.addEventListener("blur", cacher);
       chemins[code] = path;
       groupe.appendChild(path);
     });
@@ -124,7 +150,8 @@
       fm.innerHTML = '<path class="aire" d="' + dd + ' L300 60 L0 60 Z"/><path class="ligne" d="' + dd + '" pathLength="1"/><circle class="repere" r="4" cx="-10" cy="-10"/>';
       repere = function (i) {
         var c = fm.querySelector(".repere");
-        if (i == null) { c.setAttribute("cx", -10); return; }
+        if (i == null) { c.classList.remove("vu"); return; }
+        c.classList.add("vu");
         c.setAttribute("cx", pts[i][0]); c.setAttribute("cy", pts[i][1]);
       };
     }
