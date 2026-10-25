@@ -33,7 +33,10 @@ disponibles permettent d'affirmer, ce qui reste à vérifier, et vers qui se tou
 Ne réponds jamais par un simple « je ne sais pas ».
 4. Si la question ne concerne pas les paiements, impayés ou recouvrement entre professionnels, indique poliment que tu ne traites que ce sujet.
 5. Écris en français simple, en vouvoyant, en 150 à 250 mots : d'abord la réponse directe, puis les étapes concrètes.
-6. N'affirme jamais qu'une entreprise précise est de mauvaise foi ou insolvable."""
+6. N'affirme jamais qu'une entreprise précise est de mauvaise foi ou insolvable.
+7. La conversation peut contenir des échanges précédents : sers-t'en pour comprendre la question de suivi \
+(« et s'il ne paie toujours pas ? »), mais appuie chaque règle sur les articles fournis dans le dernier message. \
+Ne répète pas ce qui a déjà été dit : approfondis."""
 
 REFORMULATION = """Tu prépares une recherche dans des articles de loi français sur les délais de paiement, \
 les impayés et le recouvrement entre professionnels. Transforme la question en 8 à 15 mots-clés juridiques \
@@ -41,6 +44,9 @@ français (ex. : prescription, mise en demeure, injonction de payer, délai de g
 déclaration de créance, pénalités de retard). Réponds uniquement par les mots-clés séparés par des espaces."""
 
 CITATION_RE = re.compile(r"\[([^\]]+?),\s*art(?:icle)?\.?\s*([A-Z]?\d[\d-]*)\]")
+
+
+MAX_ECHANGES = 3  # échanges précédents transmis au modèle
 
 
 @dataclass
@@ -97,10 +103,10 @@ class Assistant:
             self._client = anthropic.Anthropic()
         return self._client
 
-    def _appel(self, system: str, contenu: str, max_tokens: int):
+    def _appel(self, system: str, contenu: str, max_tokens: int, avant: list[dict] | None = None):
         """Appel au modèle, sans réflexion étendue : la réponse doit tenir dans le budget de jetons."""
         kwargs = dict(model=self.cfg.rag["model"], max_tokens=max_tokens, system=system,
-                      messages=[{"role": "user", "content": contenu}])
+                      messages=(avant or []) + [{"role": "user", "content": contenu}])
         try:
             msg = self.client.messages.create(thinking={"type": "disabled"}, **kwargs)
         except TypeError:  # client de test sans ce paramètre
@@ -112,20 +118,32 @@ class Assistant:
         texte = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text").strip()
         return texte, getattr(msg, "stop_reason", None)
 
-    def rechercher(self, question: str, k: int | None = None, reformuler: bool = True) -> list[Article]:
-        """Recherche hybride : la question telle quelle, enrichie de mots-clés juridiques proposés par le modèle."""
+    def rechercher(self, question: str, k: int | None = None, reformuler: bool = True,
+                   precedente: str | None = None) -> list[Article]:
+        """Recherche hybride : la question telle quelle, enrichie de mots-clés juridiques proposés par le modèle.
+
+        Pour une question de suivi, la question précédente sert de contexte (« et s'il ne paie toujours pas ? »).
+        """
         k = k or self.cfg.rag["retrieval_k"]
-        requete = question
+        base = f"{precedente} {question}" if precedente else question
+        requete = base
         if reformuler and self.client is not None:
-            mots, _ = self._appel(REFORMULATION, question, 120)
-            requete = f"{question} {mots}"
+            entree = f"Question précédente : {precedente}\nQuestion : {question}" if precedente else question
+            mots, _ = self._appel(REFORMULATION, entree, 120)
+            requete = f"{base} {mots}"
         return [a for a, _ in self.index.search(requete, k=k)]
 
-    def repondre(self, question: str) -> Reponse:
+    def repondre(self, question: str, historique: list[dict] | None = None) -> Reponse:
+        """`historique` : échanges précédents [{"question": …, "reponse": …}], du plus ancien au plus récent."""
         question = question.strip()[:1000]
         if not self.index:
             return Reponse(question, None)
-        trouves = self.rechercher(question)
+        echanges = [e for e in (historique or []) if e.get("question") and e.get("reponse")][-MAX_ECHANGES:]
+        avant = []
+        for e in echanges:
+            avant += [{"role": "user", "content": f"Question : {e['question'][:1000]}"},
+                      {"role": "assistant", "content": e["reponse"][:4000]}]
+        trouves = self.rechercher(question, precedente=echanges[-1]["question"][:1000] if echanges else None)
         sources = [Source(a.titre, a.num, a.url, a.texte if len(a.texte) <= 280 else a.texte[:280].rsplit(" ", 1)[0] + "…")
                    for a in trouves]
         if not trouves:
@@ -133,7 +151,8 @@ class Assistant:
                                      "Reformulez-la, ou consultez un professionnel du droit.", sources)
         if self.client is None:
             return Reponse(question, None, sources)
-        texte, stop = self._appel(SYSTEM, f"{_contexte(trouves)}\n\nQuestion : {question}", self.cfg.rag["max_tokens"])
+        texte, stop = self._appel(SYSTEM, f"{_contexte(trouves)}\n\nQuestion : {question}", self.cfg.rag["max_tokens"],
+                                  avant=avant)
         if not texte:
             return Reponse(question, None, sources, fin=stop)
         return Reponse(question, texte, sources, verifier_citations(texte, trouves), genere=True, fin=stop)

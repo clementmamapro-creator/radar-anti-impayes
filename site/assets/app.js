@@ -188,71 +188,150 @@
 
   afficher(EXEMPLE, { exemple: true });
 
-  // ---- Assistant « impayés » ----
-  var aform = $("#aform"), aq = $("#aq"), abouton = $("#abouton"), areponse = $("#areponse"), aquota = $("#aquota");
+  // ---- Assistant « impayés » : conversation ----
+  var aform = $("#aform"), aq = $("#aq"), abouton = $("#abouton"), afil = $("#afil"), aquota = $("#aquota"),
+      anouveau = $("#anouveau");
+  var CLE = "acquit-conversation", MAX_HIST = 3;
+  var conversation = [];  // [{question, reponse, sources, avertissement, genere}]
+  var enCours = false;
 
   // Mise en forme légère de la réponse : paragraphes, listes, gras, références de loi
   function formater(t) {
     var html = esc(t)
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\[([^\]]+?, art(?:icle)?\.? ?[A-Z]?\d[\d-]*)\]/g, '<span class="cite">[$1]</span>');
+      .replace(/\[([^\]]+?, art(?:icle)?\.? ?[A-Z]?\d[\d-]*)\]/g, '<span class="cite">$1</span>');
+    // Regroupe les lignes : suites de puces ou de numéros -> listes, le reste -> paragraphes
+    var LISTE = /^\s*([-•*]|\d+[.)])\s+/;
     return html.split(/\n{2,}/).map(function (bloc) {
-      var lignes = bloc.split("\n");
-      if (lignes.every(function (l) { return /^\s*([-•]|\d+[.)])\s+/.test(l); })) {
-        var ordonnee = /^\s*\d/.test(lignes[0]);
-        return (ordonnee ? "<ol>" : "<ul>") + lignes.map(function (l) {
-          return "<li>" + l.replace(/^\s*([-•]|\d+[.)])\s+/, "") + "</li>";
-        }).join("") + (ordonnee ? "</ol>" : "</ul>");
+      var out = "", texte = [], items = [], ordonnee = false;
+      function vider() {
+        if (texte.length) { out += "<p>" + texte.join("<br>") + "</p>"; texte = []; }
+        if (items.length) { out += (ordonnee ? "<ol>" : "<ul>") + items.map(function (i) { return "<li>" + i + "</li>"; }).join("") + (ordonnee ? "</ol>" : "</ul>"); items = []; }
       }
-      return "<p>" + lignes.join("<br>") + "</p>";
+      bloc.split("\n").forEach(function (l) {
+        if (LISTE.test(l)) {
+          if (texte.length) vider();
+          if (!items.length) ordonnee = /^\s*\d/.test(l);
+          items.push(l.replace(LISTE, ""));
+        } else if (l.trim()) {
+          if (items.length) vider();
+          texte.push(l);
+        }
+      });
+      vider();
+      return out;
     }).join("");
   }
 
-  function afficherReponse(r) {
-    var h = "";
-    if (r.reponse) {
-      h += '<div class="texte">' + formater(r.reponse) + "</div>";
-    } else {
-      h += "<p>Voici les textes de loi qui correspondent à votre question.</p>";
-    }
-    if (r.sources && r.sources.length) {
-      h += "<h3>Textes officiels utilisés</h3><ul class=\"sources\">" + r.sources.map(function (s) {
-        return '<li><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.reference) + "</a>" +
-          '<span class="extrait">' + esc(s.extrait) + "</span></li>";
-      }).join("") + "</ul>";
-    }
-    h += '<p class="assistant-avert">' + esc(r.avertissement || "") + "</p>";
-    areponse.innerHTML = h;
-    areponse.hidden = false;
-    if (r.questions_restantes_aujourdhui != null) {
-      aquota.textContent = r.questions_restantes_aujourdhui + " question(s) gratuite(s) restante(s) aujourd'hui";
-    }
+  function sauver() {
+    try { localStorage.setItem(CLE, JSON.stringify(conversation.slice(-20))); } catch (e) {}
   }
+
+  function bulleUtilisateur(q) {
+    var d = document.createElement("div");
+    d.className = "msg msg-moi";
+    d.innerHTML = '<div class="bulle">' + esc(q) + "</div>";
+    afil.appendChild(d);
+    return d;
+  }
+
+  function bulleAssistant(html, classe) {
+    var d = document.createElement("div");
+    d.className = "msg msg-ia" + (classe ? " " + classe : "");
+    d.innerHTML = '<span class="chat-avatar" aria-hidden="true">A</span><div class="bulle">' + html + "</div>";
+    afil.appendChild(d);
+    return d;
+  }
+
+  function contenuReponse(r) {
+    var h = r.reponse ? '<div class="reponse-texte">' + formater(r.reponse) + "</div>"
+                      : "<p>Voici les textes de loi qui correspondent à votre question.</p>";
+    if (r.sources && r.sources.length) {
+      h += '<details class="sources-bloc"><summary>' + r.sources.length + " textes officiels consultés</summary>" +
+        '<ul class="sources">' + r.sources.map(function (s) {
+          return '<li><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.reference) + "</a>" +
+            '<span class="extrait">' + esc(s.extrait) + "</span></li>";
+        }).join("") + "</ul></details>";
+    }
+    if (r.avertissement) h += '<p class="assistant-avert">' + esc(r.avertissement) + "</p>";
+    return h;
+  }
+
+  function defiler(el) {
+    // Montre le début de la nouvelle réponse, pas la fin : on lit de haut en bas
+    afil.scrollTo({ top: el.offsetTop - afil.offsetTop - 12, behavior: "smooth" });
+  }
+
+  function majEtat() {
+    if (anouveau) anouveau.hidden = conversation.length === 0;
+    var ex = $("#aexemples");
+    if (ex) ex.hidden = conversation.length > 0;
+    aq.placeholder = conversation.length ? "Posez une question de suivi…" : "Écrivez votre question…";
+  }
+
+  function ajuster() { aq.style.height = "auto"; aq.style.height = Math.min(aq.scrollHeight, 180) + "px"; }
 
   function poser(question) {
     question = question.trim();
+    if (enCours) return;
     if (question.length < 5) { aq.focus(); return; }
+    enCours = true;
     abouton.disabled = true;
-    areponse.hidden = false;
-    areponse.innerHTML = '<p class="fiche-attente">Recherche dans les textes de loi…</p>';
-    var lent = setTimeout(function () {
-      var p = areponse.querySelector(".fiche-attente");
-      if (p) p.textContent = "Le service se réveille, cela peut prendre jusqu'à une minute.";
-    }, 6000);
-    fetch(API + "/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: question }) })
+    aq.value = ""; ajuster();
+    bulleUtilisateur(question);
+    var attente = bulleAssistant('<div class="ecrit"><span></span><span></span><span></span></div>' +
+      '<p class="etape">Recherche dans les textes de loi…</p>', "msg-attente");
+    defiler(attente);
+    var etape = attente.querySelector(".etape");
+    var t1 = setTimeout(function () { etape.textContent = "Rédaction de la réponse à partir des articles retrouvés…"; }, 2500);
+    var t2 = setTimeout(function () { etape.textContent = "Le service se réveille, cela peut prendre jusqu'à une minute."; }, 12000);
+    var historique = conversation.filter(function (e) { return e.reponse; }).slice(-MAX_HIST)
+      .map(function (e) { return { question: e.question, reponse: e.reponse }; });
+    fetch(API + "/assistant", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: question, historique: historique }) })
       .then(function (res) { return res.json().then(function (d) { if (!res.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Votre question doit faire entre 5 et 1 000 caractères."); return d; }); })
       .then(function (r) {
-        afficherReponse(r);
-        try { if (window.umami) window.umami.track("assistant", { genere: !!r.genere }); } catch (e) {}
+        attente.remove();
+        var e = { question: question, reponse: r.reponse, sources: r.sources, avertissement: r.avertissement };
+        conversation.push(e); sauver();
+        defiler(bulleAssistant(contenuReponse(e)));
+        if (r.questions_restantes_aujourdhui != null) {
+          aquota.textContent = r.questions_restantes_aujourdhui + " question(s) gratuite(s) restante(s) aujourd'hui";
+        }
+        try { if (window.umami) window.umami.track("assistant", { genere: !!r.genere, suivi: historique.length > 0 }); } catch (err) {}
       })
-      .catch(function (e) { areponse.innerHTML = '<p class="erreur">' + esc(typeof e.message === "string" ? e.message : "La réponse a échoué. Réessayez dans un instant.") + "</p>"; })
-      .then(function () { clearTimeout(lent); abouton.disabled = false; });
+      .catch(function (err) {
+        attente.remove();
+        bulleAssistant('<p class="erreur">' + esc(typeof err.message === "string" ? err.message : "La réponse a échoué. Réessayez dans un instant.") + "</p>", "msg-erreur");
+        if (!aq.value) { aq.value = question; ajuster(); }
+      })
+      .then(function () { clearTimeout(t1); clearTimeout(t2); enCours = false; abouton.disabled = false; majEtat(); });
   }
 
   if (aform) {
+    // Reprise de la conversation enregistrée dans ce navigateur
+    try { conversation = JSON.parse(localStorage.getItem(CLE) || "[]") || []; } catch (e) { conversation = []; }
+    conversation.forEach(function (e) { bulleUtilisateur(e.question); bulleAssistant(contenuReponse(e)); });
+    majEtat();
+
     aform.addEventListener("submit", function (e) { e.preventDefault(); poser(aq.value); });
+    // Le bouton « retour en haut » s'efface quand la zone de saisie est à l'écran (mobile)
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) {
+        document.body.classList.toggle("chat-visible", es[0].isIntersecting);
+      }).observe(aform);
+    }
+    aq.addEventListener("input", ajuster);
+    aq.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); poser(aq.value); }
+    });
     document.querySelectorAll("#aexemples button").forEach(function (b) {
-      b.addEventListener("click", function () { aq.value = b.textContent; poser(b.textContent); });
+      b.addEventListener("click", function () { poser(b.textContent); });
+    });
+    if (anouveau) anouveau.addEventListener("click", function () {
+      conversation = []; sauver();
+      afil.querySelectorAll(".msg:not(.msg-accueil)").forEach(function (m) { m.remove(); });
+      majEtat(); aq.focus();
     });
   }
 

@@ -147,3 +147,28 @@ def test_archives_et_fusion():
     nouveau = Article("2", "Code de commerce", "L441-10", "nouveau", "2026-01-01", "u")
     assert [a.texte for a in fusionner([ancien], [nouveau])] == ["nouveau"]
     assert [a.texte for a in fusionner([nouveau], [ancien])] == ["nouveau"]
+
+
+def test_question_de_suivi_avec_historique():
+    fake = FakeClient()
+    a = Assistant(load_config(), articles=corpus(), client=fake)
+    hist = [{"question": "Quel est le délai de paiement maximum ?", "reponse": "60 jours [Code de commerce, art. L441-10]."}]
+    r = a.repondre("Et s'il dépasse ce délai, que puis-je réclamer ?", historique=hist)
+    assert r.genere
+    assert "Question précédente" in fake.calls[0]["messages"][0]["content"]  # la reformulation voit le contexte
+    msgs = fake.calls[1]["messages"]
+    assert [m["role"] for m in msgs] == ["user", "assistant", "user"]
+    assert msgs[1]["content"].startswith("60 jours") and "<article" in msgs[2]["content"]
+
+
+def test_api_accepte_un_historique(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from radar import api
+
+    monkeypatch.setattr(api, "get_assistant", lambda: Assistant(load_config(), articles=corpus(), client=FakeClient()))
+    api._quota.clear()
+    c = TestClient(api.app)
+    r = c.post("/assistant", json={"question": "Et ensuite, que faire ?",
+                                   "historique": [{"question": "Délai maximum ?", "reponse": "60 jours."}]})
+    assert r.status_code == 200 and r.json()["genere"]

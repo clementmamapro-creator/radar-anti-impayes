@@ -84,8 +84,14 @@ def _consommer(request: Request, limite: int) -> int:
     return limite - _quota[v]
 
 
+class Echange(BaseModel):
+    question: str = Field(max_length=1000)
+    reponse: str = Field(max_length=4000)
+
+
 class Question(BaseModel):
     question: str = Field(min_length=5, max_length=1000)
+    historique: list[Echange] = Field(default_factory=list, max_length=10)
 
 
 @app.post("/assistant")
@@ -97,7 +103,7 @@ def assistant(q: Question, request: Request) -> dict:
     restantes = None
     if a.client is not None:
         restantes = _consommer(request, load_config().rag["free_daily_quota"])
-    res = a.repondre(q.question).to_dict()
+    res = a.repondre(q.question, [e.model_dump() for e in q.historique]).to_dict()
     res["questions_restantes_aujourdhui"] = restantes
     return res
 

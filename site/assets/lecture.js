@@ -40,7 +40,7 @@
   // Apparition douce des blocs au fil de la lecture
   if (!calme) {
     var blocs = document.querySelectorAll(
-      ".section h2, .section .intro, .moments li, .methode > div, .tarif, .faq details, .assistant-form, .texte > *"
+      ".section h2, .section .intro, .moments li, .methode > div, .tarif, .faq details, .chat, main.texte > *"
     );
     var obs = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {

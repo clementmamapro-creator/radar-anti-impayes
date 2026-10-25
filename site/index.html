@@ -74,23 +74,45 @@
       <div class="assistant-tete">
         <span class="statut statut-dispo">Nouveau</span>
         <h2>Votre client ne paie pas ? Posez votre question.</h2>
-        <p class="intro">L'assistant répond à partir des textes de loi officiels (Légifrance) et cite chaque article utilisé. 3 questions gratuites par jour.</p>
+        <p class="intro">L'assistant répond à partir des textes de loi officiels (Légifrance) et cite chaque article utilisé. Posez votre question, puis approfondissez : il garde le fil.</p>
       </div>
-      <form class="assistant-form" id="aform" novalidate>
-        <label for="aq">Votre question</label>
-        <textarea id="aq" rows="3" maxlength="1000" placeholder="Ex. : Mon client a 30 jours de retard, puis-je lui facturer des pénalités ?" required></textarea>
-        <div class="assistant-actions">
-          <button class="btn btn-principal" type="submit" id="abouton">Poser ma question</button>
-          <span class="aide" id="aquota"></span>
+      <div class="chat" id="chat">
+        <div class="chat-barre">
+          <span class="chat-avatar" aria-hidden="true">A</span>
+          <div class="chat-titre">
+            <strong>Assistant Acquit</strong>
+            <span><i class="point-vert" aria-hidden="true"></i>Textes Légifrance à jour · réponses sourcées</span>
+          </div>
+          <button type="button" class="chat-nouveau" id="anouveau" hidden>Nouvelle conversation</button>
         </div>
-        <div class="exemples" id="aexemples">
-          <button type="button">Quel est le délai de paiement maximum entre entreprises ?</button>
-          <button type="button">Combien puis-je réclamer pour une facture payée en retard ?</button>
-          <button type="button">Comment faire une injonction de payer ?</button>
-          <button type="button">Mon client est en redressement judiciaire, que faire ?</button>
+        <div class="chat-fil" id="afil" aria-live="polite">
+          <div class="msg msg-ia msg-accueil">
+            <span class="chat-avatar" aria-hidden="true">A</span>
+            <div class="bulle">
+              <p>Bonjour. Décrivez votre situation : un client en retard, une facture contestée, une annulation… Je vous réponds à partir des textes de loi officiels, en citant chaque article.</p>
+              <p class="sous">Vous pouvez ensuite me poser des questions de suivi : je garde le fil de la conversation.</p>
+              <div class="exemples" id="aexemples">
+                <button type="button">Quel est le délai de paiement maximum entre entreprises ?</button>
+                <button type="button">Combien puis-je réclamer pour une facture payée en retard ?</button>
+                <button type="button">Comment faire une injonction de payer ?</button>
+                <button type="button">Mon client est en redressement judiciaire, que faire ?</button>
+              </div>
+            </div>
+          </div>
         </div>
-      </form>
-      <div class="assistant-reponse" id="areponse" aria-live="polite" hidden></div>
+        <form class="chat-saisie" id="aform" novalidate>
+          <label for="aq" class="visuellement-cache">Votre question</label>
+          <textarea id="aq" rows="1" maxlength="1000" placeholder="Écrivez votre question…" required></textarea>
+          <button class="chat-envoyer" type="submit" id="abouton" aria-label="Envoyer la question">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </form>
+        <div class="chat-pied">
+          <span id="aquota">3 questions gratuites par jour</span>
+          <span class="chat-touche">Entrée pour envoyer · Maj + Entrée pour aller à la ligne</span>
+        </div>
+      </div>
+      <p class="chat-techno">Comment ça marche : un moteur de recherche retrouve les articles de loi pertinents, puis une IA générative (Claude, d'Anthropic) rédige la réponse <em>uniquement</em> à partir de ces articles. Chaque citation est vérifiée automatiquement.</p>
     </div>
   </section>
 
