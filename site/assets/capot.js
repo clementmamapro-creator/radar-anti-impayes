@@ -157,3 +157,45 @@
   setInterval(charger, 5000);
   document.addEventListener("visibilitychange", charger);
 })();
+
+/* Test de charge : avant / après le cache des scores (fichiers publiés avec le site) */
+(function () {
+  "use strict";
+  var svg = document.getElementById("cgraph");
+  if (!svg) return;
+  function lire(f) { return fetch("assets/" + f + "?v=2").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
+  function fr(x, d) { return x == null ? "–" : x.toLocaleString("fr-FR", { maximumFractionDigits: d || 0 }); }
+  Promise.all([lire("charge-avant.json"), lire("charge-apres.json")]).then(function (res) {
+    var avant = res[0], apres = res[1];
+    if (!avant) return;
+    var paliers = avant.paliers.map(function (p) { return p.utilisateurs_simultanes; });
+    var max = Math.max.apply(null, [avant].concat(apres ? [apres] : []).map(function (r) { return r.debit_max_rps; }));
+    var W = 600, H = 220, g = 34, bas = H - 26, n = paliers.length, pas = (W - g) / n, bw = apres ? pas * 0.34 : pas * 0.5;
+    var h = "";
+    [0.25, 0.5, 0.75, 1].forEach(function (t) {
+      var y = bas - (bas - 14) * t;
+      h += '<line class="grille" x1="' + g + '" x2="' + W + '" y1="' + y + '" y2="' + y + '"/><text class="axe" x="' + (g - 6) + '" y="' + (y + 4) + '" text-anchor="end">' + fr(max * t) + "</text>";
+    });
+    paliers.forEach(function (u, i) {
+      var x0 = g + i * pas + pas / 2;
+      [[avant, "avant", apres ? -bw / 2 - 2 : 0], [apres, "apres", bw / 2 + 2]].forEach(function (s) {
+        if (!s[0]) return;
+        var p = s[0].paliers[i];
+        if (!p) return;
+        var hh = (bas - 14) * p.debit_rps / max, x = x0 + s[2] - bw / 2;
+        h += '<rect class="' + s[1] + '" x="' + x.toFixed(1) + '" y="' + (bas - hh).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + hh.toFixed(1) + '" rx="3"><title>' + u + " utilisateurs : " + fr(p.debit_rps, 1) + " req/s, médiane " + fr(p.p50_ms) + " ms</title></rect>";
+      });
+      h += '<text class="axe" x="' + x0 + '" y="' + (H - 8) + '" text-anchor="middle">' + u + "</text>";
+    });
+    svg.innerHTML = h;
+    document.querySelectorAll('[data-c="avant"]').forEach(function (e) { e.textContent = fr(avant.debit_max_rps); });
+    if (apres) {
+      var gain = apres.debit_max_rps / avant.debit_max_rps;
+      var p40a = avant.paliers[avant.paliers.length - 1], p40b = apres.paliers[apres.paliers.length - 1];
+      document.querySelectorAll('[data-c="apres"]').forEach(function (e) {
+        e.textContent = fr(apres.debit_max_rps) + " req/s, soit ×" + fr(gain, 1) + " ; à " + p40b.utilisateurs_simultanes +
+          " utilisateurs, la latence médiane passe de " + fr(p40a.p50_ms) + " à " + fr(p40b.p50_ms) + " ms, sans aucune erreur";
+      });
+    }
+  });
+})();

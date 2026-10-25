@@ -562,3 +562,16 @@ body.page-capot .pied { background: #080E1A; }
   #fcarte .dep { opacity: 1; transform: none; transition: none; }
   .radar-carte.vivante #fcarte .halo { animation: none; }
 }
+.charge { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; }
+@media (max-width: 860px) { .charge { grid-template-columns: 1fr; } }
+.charge-graph { width: 100%; height: auto; display: block; }
+.charge-graph .grille { stroke: var(--filet); stroke-dasharray: 3 4; }
+.charge-graph .axe { fill: var(--ardoise); font-size: 12px; }
+.charge-graph .avant { fill: var(--bordure); }
+.charge-graph .apres { fill: var(--neon); filter: drop-shadow(0 0 6px rgba(124,224,176,.4)); }
+.l-avant, .l-apres { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.l-avant { background: var(--bordure); }
+.l-apres { background: var(--neon); margin-left: 10px; }
+.charge-recit { margin: 0; padding-left: 1.2em; display: grid; gap: 12px; font-size: 15px; line-height: 1.55; color: var(--ardoise); }
+.charge-recit b { color: var(--encre); }
+.charge-recit [data-c] { color: var(--neon); font-weight: 600; }

@@ -154,6 +154,28 @@
 
   <section class="capot-section">
     <div class="wrap">
+      <h2>Mesuré sous la charge</h2>
+      <p class="capot-intro">Test de charge progressif sur la route de score, en production : de 1 à 40 utilisateurs simultanés, 20 secondes par palier. Puis la même mesure après optimisation.</p>
+      <div class="charge" id="charge">
+        <div class="carte carte-large">
+          <p class="carte-titre">Débit (requêtes par seconde) selon le nombre d'utilisateurs simultanés</p>
+          <svg class="charge-graph" id="cgraph" viewBox="0 0 600 220" role="img" aria-label="Débit avant et après le cache des scores"></svg>
+          <p class="legende"><span class="l-avant"></span>avant : calcul à chaque requête <span class="l-apres"></span>après : cache des scores</p>
+        </div>
+        <div class="carte">
+          <p class="carte-titre">Ce que le test a montré</p>
+          <ol class="charge-recit">
+            <li><b>Diagnostic.</b> Au-delà de 10 utilisateurs, le débit plafonne (<span data-c="avant">–</span> req/s) et la latence grimpe : le CPU (0,5 cœur) sature sur le calcul du modèle et des explications SHAP.</li>
+            <li><b>Remède ciblé.</b> Les scores ne changent qu'une fois par semaine : on garde les réponses déjà calculées en mémoire.</li>
+            <li><b>Résultat.</b> <span data-c="apres">mesure en cours</span>.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="capot-section">
+    <div class="wrap">
       <h2>Conçu pour tenir</h2>
       <p class="capot-intro">Ce qui protège le service quand le trafic monte ou qu'une brique tombe.</p>
       <div class="fiab">

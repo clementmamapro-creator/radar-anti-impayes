@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-25T09:20:46Z",
+  "cible": "https://acquit-solutions.fr",
+  "route": "/score/{siren}",
+  "duree_palier_s": 20,
+  "paliers": [
+    {
+      "utilisateurs_simultanes": 1,
+      "requetes": 104,
+      "debit_rps": 5.2,
+      "p50_ms": 181.5,
+      "p95_ms": 201.0,
+      "p99_ms": 484.8,
+      "moyenne_ms": 193.8,
+      "erreurs_pct": 0.0
+    },
+    {
+      "utilisateurs_simultanes": 2,
+      "requetes": 208,
+      "debit_rps": 10.3,
+      "p50_ms": 184.0,
+      "p95_ms": 215.5,
+      "p99_ms": 512.0,
+      "moyenne_ms": 193.3,
+      "erreurs_pct": 0.0
+    },
+    {
+      "utilisateurs_simultanes": 5,
+      "requetes": 479,
+      "debit_rps": 23.7,
+      "p50_ms": 188.5,
+      "p95_ms": 300.1,
+      "p99_ms": 569.7,
+      "moyenne_ms": 209.6,
+      "erreurs_pct": 0.0
+    },
+    {
+      "utilisateurs_simultanes": 10,
+      "requetes": 550,
+      "debit_rps": 27.0,
+      "p50_ms": 373.3,
+      "p95_ms": 635.9,
+      "p99_ms": 964.2,
+      "moyenne_ms": 367.0,
+      "erreurs_pct": 0.0
+    },
+    {
+      "utilisateurs_simultanes": 20,
+      "requetes": 541,
+      "debit_rps": 26.3,
+      "p50_ms": 787.0,
+      "p95_ms": 1196.9,
+      "p99_ms": 1799.8,
+      "moyenne_ms": 756.4,
+      "erreurs_pct": 0.0
+    },
+    {
+      "utilisateurs_simultanes": 40,
+      "requetes": 501,
+      "debit_rps": 23.9,
+      "p50_ms": 1707.1,
+      "p95_ms": 2210.2,
+      "p99_ms": 2472.3,
+      "moyenne_ms": 1643.1,
+      "erreurs_pct": 0.0
+    }
+  ],
+  "debit_max_rps": 27.0,
+  "debit_max_par_minute": 1620,
+  "concurrence_au_debit_max": 10
+}
