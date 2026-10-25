@@ -1,20 +1,18 @@
-"""Sonde ponctuelle : syntaxes d'agrégation BODACC (Opendatasoft) pour la carte."""
+"""Sonde ponctuelle : état du site en production et requête mensuelle par département (BODACC)."""
 import json, httpx
-B = "https://bodacc-datadila.opendatasoft.com/api/explore/v2.1/catalog/datasets/annonces-commerciales"
-essais = {
-  "sans_filtre_jugement": "familleavis='collective' and dateparution>=date'2025-10-01'",
-  "like_pct": "familleavis='collective' and dateparution>=date'2025-10-01' and jugement like '%ouverture%'",
-  "like_etoile": "familleavis='collective' and dateparution>=date'2025-10-01' and jugement like \"*ouverture*\"",
-  "search": "familleavis='collective' and dateparution>=date'2025-10-01' and search(jugement, \"ouverture\")",
-}
+B = "https://bodacc-datadila.opendatasoft.com/api/explore/v2.1/catalog/datasets/annonces-commerciales/records"
 out = {}
-for k, w in essais.items():
-    r = httpx.get(B + "/records", params={"select": "numerodepartement, count(*) as n", "where": w,
-                  "group_by": "numerodepartement", "order_by": "n desc", "limit": 5}, timeout=60)
-    out[k] = {"status": r.status_code, "body": r.text[:600]}
-r = httpx.get(B + "/records", params={"where": "familleavis='collective'", "limit": 1, "order_by": "dateparution desc"}, timeout=60)
-out["exemple"] = r.text[:2500]
-r = httpx.get(B + "/records", params={"select": "year(dateparution) as an, month(dateparution) as mois, count(*) as n",
-              "where": "familleavis='collective' and dateparution>=date'2024-10-01'", "group_by": "an, mois", "limit": 30}, timeout=60)
-out["mensuel"] = {"status": r.status_code, "body": r.text[:800]}
+for chemin in ("/metriques", "/carte"):
+    try:
+        r = httpx.get("https://acquit-solutions.fr" + chemin, timeout=90)
+        d = r.json()
+        out[chemin] = {"status": r.status_code, "commit": (d.get("service") or {}).get("commit"),
+                       "total": d.get("total"), "evolution": d.get("evolution_pct"), "mensuel": len(d.get("mensuel") or []),
+                       "departements": len(d.get("departements") or {})}
+    except Exception as e:
+        out[chemin] = repr(e)
+r = httpx.get(B, params={"select": "count(*) as n",
+              "where": "familleavis='collective' and jugement like '%ouverture%' and dateparution>=date'2024-10-01' and dateparution<date'2026-10-01'",
+              "group_by": "numerodepartement, date_format(dateparution, 'yyyy-MM') as mois", "limit": -1}, timeout=120)
+out["dep_mois"] = {"status": r.status_code, "lignes": len(r.json().get("results") or []) if r.status_code == 200 else None, "debut": r.text[:400]}
 print(json.dumps(out, ensure_ascii=False, indent=1))
