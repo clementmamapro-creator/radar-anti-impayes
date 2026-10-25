@@ -22,8 +22,13 @@ ENV OMP_NUM_THREADS=1 \
     OPENBLAS_NUM_THREADS=1 \
     MKL_NUM_THREADS=1 \
     LOKY_MAX_CPU_COUNT=1
+# ADD télécharge le paquet à chaque build et ne réutilise le cache que si son
+# contenu est identique : un nouveau paquet publié est donc toujours pris en
+# compte, même quand le code n'a pas changé (redéploiement par deploy hook).
+ADD ${MODEL_URL} /tmp/acquit-serve.tar.gz
 RUN if [ "$DEMO" = "1" ]; then python -m radar demo && python -m radar build && python -m radar train; \
-    else python -m radar fetch "$MODEL_URL"; fi
+    else tar xzf /tmp/acquit-serve.tar.gz -C /app; fi \
+    && rm -f /tmp/acquit-serve.tar.gz
 
 EXPOSE 8000
 CMD ["sh", "-c", "uvicorn radar.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
