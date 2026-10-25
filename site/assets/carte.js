@@ -73,9 +73,14 @@
 
     // Sur ordinateur, l'info-bulle suit la souris et ne bloque jamais les clics (pointer-events: none).
     // Sur écran tactile, elle s'affiche sous la carte et se ferme en touchant ailleurs.
-    var souris = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    // Détection au premier mouvement réel de souris (fiable aussi sur les PC à écran tactile)
+    var souris = false;
     var zone = svg.parentNode;
-    if (souris) info.classList.add("flottante");
+    zone.addEventListener("pointermove", function (e) {
+      if (e.pointerType === "mouse" && !souris) { souris = true; info.classList.add("flottante"); }
+      suivre(e);
+    });
+    zone.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") cacher(); });
     function suivre(e) {
       if (!souris || info.hidden) return;
       var r = zone.getBoundingClientRect(), w = info.offsetWidth, h = info.offsetHeight;
@@ -121,8 +126,6 @@
       path.addEventListener("mouseenter", survol);
       path.addEventListener("focus", survol);
       path.addEventListener("click", function (e) { e.stopPropagation(); survol(); suivre(e); });
-      path.addEventListener("mousemove", suivre);
-      path.addEventListener("mouseleave", cacher);
       path.addEventListener("blur", cacher);
       chemins[code] = path;
       groupe.appendChild(path);
