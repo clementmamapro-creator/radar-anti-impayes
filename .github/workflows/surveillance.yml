@@ -1,0 +1,32 @@
+name: Surveillance du site
+
+# Toutes les 15 minutes : le site et l'API répondent-ils, et assez vite ?
+# En cas d'échec, GitHub envoie automatiquement un e-mail au propriétaire du dépôt.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Vérifier acquit-solutions.fr (2 essais à 60 s d'intervalle)
+        run: |
+          verifier() {
+            ok=1
+            for chemin in "/" "/health" "/penalites-de-retard"; do
+              code=$(curl -s -o /tmp/r -w "%{http_code} %{time_total}" --max-time 20 "https://acquit-solutions.fr$chemin") || code="000 20"
+              echo "$chemin -> $code"
+              set -- $code
+              if [ "$1" != "200" ]; then ok=0; fi
+              if [ "$chemin" = "/health" ] && ! grep -q '"status":"ok"' /tmp/r; then ok=0; fi
+            done
+            [ $ok = 1 ]
+          }
+          if verifier; then exit 0; fi
+          echo "Premier essai en échec, nouvel essai dans 60 s"; sleep 60
+          if verifier; then exit 0; fi
+          echo "::error::acquit-solutions.fr ne répond pas correctement"
+          exit 1

@@ -673,3 +673,17 @@ body.page-capot .pied { background: #080E1A; }
 .calc-faq dt { font-weight: 600; margin-bottom: 4px; }
 .calc-faq dd { margin: 0; color: var(--ardoise); line-height: 1.6; }
 .calc-note { font-size: 13px; color: var(--ardoise); margin: 28px 0 0; }
+
+/* Page 404 */
+.page-404 { padding: 96px 0 120px; text-align: center; }
+.page-404 h1 { margin: 8px auto 12px; max-width: 16em; }
+.page-404 .chapeau { margin: 0 auto 32px; }
+.tampon-404 { width: 96px; height: 96px; color: var(--alerte); transform: rotate(-12deg); animation: tamponne 600ms cubic-bezier(.2,1.4,.4,1) both; }
+@keyframes tamponne { from { transform: rotate(-30deg) scale(1.8); opacity: 0; } to { transform: rotate(-12deg) scale(1); opacity: 1; } }
+.code-404 { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--ardoise); margin: 16px 0 0; }
+.liens-404 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 820px; margin: 0 auto; }
+@media (max-width: 720px) { .liens-404 { grid-template-columns: 1fr; } }
+.liens-404 a { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 18px; border: 1px solid var(--filet); border-radius: 14px; background: var(--feuille); color: var(--encre); text-decoration: none; transition: border-color 150ms, transform 150ms; }
+.liens-404 a:hover { border-color: var(--acquit); transform: translateY(-2px); }
+.liens-404 span { font-size: 14px; color: var(--ardoise); }
+@media (prefers-reduced-motion: reduce) { .tampon-404 { animation: none; } }

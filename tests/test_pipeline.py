@@ -254,3 +254,12 @@ def test_fichiers_de_referencement():
     for f in ("/robots.txt", "/sitemap.xml", "/llms.txt"):
         assert c.get(f).status_code == 200
     assert "Sitemap:" in c.get("/robots.txt").text
+
+
+def test_page_404_personnalisee():
+    from fastapi.testclient import TestClient
+
+    from radar import api
+
+    r = TestClient(api.app).get("/une/adresse/inexistante")
+    assert r.status_code == 404 and "pas sur la facture" in r.text
