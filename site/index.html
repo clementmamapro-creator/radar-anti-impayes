@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/acquit.css">
+<link rel="stylesheet" href="assets/acquit.css?v=20261025a">
 <script defer src="https://cloud.umami.is/script.js" data-website-id="48bad13f-c477-4195-9fd3-00dcf9cde7f7" data-domains="acquit-solutions.fr,www.acquit-solutions.fr"></script>
 </head>
 <body>
@@ -73,46 +73,36 @@
     <div class="wrap">
       <div class="assistant-tete">
         <span class="statut statut-dispo">Nouveau</span>
-        <h2>Votre client ne paie pas ? Posez votre question.</h2>
-        <p class="intro">L'assistant répond à partir des textes de loi officiels (Légifrance) et cite chaque article utilisé. Posez votre question, puis approfondissez : il garde le fil.</p>
+        <h2>Votre client ne paie pas ?</h2>
+        <p class="intro">Réponses fondées sur les textes de loi officiels, chaque article cité.</p>
       </div>
       <div class="chat" id="chat">
-        <div class="chat-barre">
-          <span class="chat-avatar" aria-hidden="true">A</span>
-          <div class="chat-titre">
-            <strong>Assistant Acquit</strong>
-            <span><i class="point-vert" aria-hidden="true"></i>Textes Légifrance à jour · réponses sourcées</span>
-          </div>
-          <button type="button" class="chat-nouveau" id="anouveau" hidden>Nouvelle conversation</button>
-        </div>
-        <div class="chat-fil" id="afil" aria-live="polite">
-          <div class="msg msg-ia msg-accueil">
-            <span class="chat-avatar" aria-hidden="true">A</span>
-            <div class="bulle">
-              <p>Bonjour. Décrivez votre situation : un client en retard, une facture contestée, une annulation… Je vous réponds à partir des textes de loi officiels, en citant chaque article.</p>
-              <p class="sous">Vous pouvez ensuite me poser des questions de suivi : je garde le fil de la conversation.</p>
-              <div class="exemples" id="aexemples">
-                <button type="button">Quel est le délai de paiement maximum entre entreprises ?</button>
-                <button type="button">Combien puis-je réclamer pour une facture payée en retard ?</button>
-                <button type="button">Comment faire une injonction de payer ?</button>
-                <button type="button">Mon client est en redressement judiciaire, que faire ?</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="chat-fil" id="afil" aria-live="polite" hidden></div>
         <form class="chat-saisie" id="aform" novalidate>
           <label for="aq" class="visuellement-cache">Votre question</label>
-          <textarea id="aq" rows="1" maxlength="1000" placeholder="Écrivez votre question…" required></textarea>
-          <button class="chat-envoyer" type="submit" id="abouton" aria-label="Envoyer la question">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
+          <textarea id="aq" rows="1" maxlength="1000" placeholder="Décrivez votre situation…" required></textarea>
+          <div class="chat-outils">
+            <button type="button" class="outil" data-pro="Import de PDF (devis, factures, courriers)" aria-label="Joindre un PDF">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <button type="button" class="outil" data-pro="Dictée vocale" aria-label="Dicter la question">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <button type="button" class="chat-nouveau" id="anouveau" hidden>Nouvelle conversation</button>
+            <button class="chat-envoyer" type="submit" id="abouton" aria-label="Envoyer">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <p class="chat-bulle-pro" id="apro" role="status" hidden></p>
         </form>
-        <div class="chat-pied">
-          <span id="aquota">3 questions gratuites par jour</span>
-          <span class="chat-touche">Entrée pour envoyer · Maj + Entrée pour aller à la ligne</span>
+        <div class="exemples chat-exemples" id="aexemples">
+          <button type="button" data-q="Quel est le délai de paiement maximum entre entreprises ?">Délai de paiement maximum</button>
+          <button type="button" data-q="Combien puis-je réclamer pour une facture payée en retard ?">Pénalités de retard</button>
+          <button type="button" data-q="Comment faire une injonction de payer ?">Injonction de payer</button>
+          <button type="button" data-q="Mon client est en redressement judiciaire, que faire ?">Client en redressement</button>
         </div>
+        <p class="chat-pied" id="aquota">3 questions gratuites par jour · réponses sourcées Légifrance</p>
       </div>
-      <p class="chat-techno">Comment ça marche : un moteur de recherche retrouve les articles de loi pertinents, puis une IA générative (Claude, d'Anthropic) rédige la réponse <em>uniquement</em> à partir de ces articles. Chaque citation est vérifiée automatiquement.</p>
     </div>
   </section>
 
@@ -252,7 +242,7 @@
   </div>
 </footer>
 
-<script src="assets/app.js"></script>
-<script src="assets/lecture.js" defer></script>
+<script src="assets/app.js?v=20261025a"></script>
+<script src="assets/lecture.js?v=20261025a" defer></script>
 </body>
 </html>

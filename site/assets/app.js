@@ -190,7 +190,8 @@
 
   // ---- Assistant « impayés » : conversation ----
   var aform = $("#aform"), aq = $("#aq"), abouton = $("#abouton"), afil = $("#afil"), aquota = $("#aquota"),
-      anouveau = $("#anouveau");
+      anouveau = $("#anouveau"), avide = $("#avide"), apro = $("#apro");
+  var MARQUE = '<span class="marque-ia" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
   var CLE = "acquit-conversation", MAX_HIST = 3;
   var conversation = [];  // [{question, reponse, sources, avertissement, genere}]
   var enCours = false;
@@ -230,7 +231,7 @@
   function bulleUtilisateur(q) {
     var d = document.createElement("div");
     d.className = "msg msg-moi";
-    d.innerHTML = '<div class="bulle">' + esc(q) + "</div>";
+    d.textContent = q;
     afil.appendChild(d);
     return d;
   }
@@ -238,7 +239,7 @@
   function bulleAssistant(html, classe) {
     var d = document.createElement("div");
     d.className = "msg msg-ia" + (classe ? " " + classe : "");
-    d.innerHTML = '<span class="chat-avatar" aria-hidden="true">A</span><div class="bulle">' + html + "</div>";
+    d.innerHTML = MARQUE + '<div class="corps">' + html + "</div>";
     afil.appendChild(d);
     return d;
   }
@@ -247,7 +248,7 @@
     var h = r.reponse ? '<div class="reponse-texte">' + formater(r.reponse) + "</div>"
                       : "<p>Voici les textes de loi qui correspondent à votre question.</p>";
     if (r.sources && r.sources.length) {
-      h += '<details class="sources-bloc"><summary>' + r.sources.length + " textes officiels consultés</summary>" +
+      h += '<details class="sources-bloc"><summary>' + r.sources.length + " sources Légifrance</summary>" +
         '<ul class="sources">' + r.sources.map(function (s) {
           return '<li><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.reference) + "</a>" +
             '<span class="extrait">' + esc(s.extrait) + "</span></li>";
@@ -259,14 +260,17 @@
 
   function defiler(el) {
     // Montre le début de la nouvelle réponse, pas la fin : on lit de haut en bas
-    afil.scrollTo({ top: el.offsetTop - afil.offsetTop - 12, behavior: "smooth" });
+    afil.scrollTo({ top: el.offsetTop - afil.offsetTop - 8, behavior: "smooth" });
   }
 
   function majEtat() {
     if (anouveau) anouveau.hidden = conversation.length === 0;
+    var vide = conversation.length === 0 && !enCours;
     var ex = $("#aexemples");
-    if (ex) ex.hidden = conversation.length > 0;
-    aq.placeholder = conversation.length ? "Posez une question de suivi…" : "Écrivez votre question…";
+    if (ex) ex.hidden = !vide;
+    if (avide) avide.hidden = !vide;
+    afil.hidden = vide;
+    aq.placeholder = vide ? "Décrivez votre situation…" : "Posez une question de suivi…";
   }
 
   function ajuster() { aq.style.height = "auto"; aq.style.height = Math.min(aq.scrollHeight, 180) + "px"; }
@@ -279,12 +283,10 @@
     abouton.disabled = true;
     aq.value = ""; ajuster();
     bulleUtilisateur(question);
-    var attente = bulleAssistant('<div class="ecrit"><span></span><span></span><span></span></div>' +
-      '<p class="etape">Recherche dans les textes de loi…</p>', "msg-attente");
+    majEtat();
+    var attente = bulleAssistant('<div class="ecrit" aria-label="Rédaction en cours"><span></span><span></span><span></span></div>', "msg-attente");
     defiler(attente);
-    var etape = attente.querySelector(".etape");
-    var t1 = setTimeout(function () { etape.textContent = "Rédaction de la réponse à partir des articles retrouvés…"; }, 2500);
-    var t2 = setTimeout(function () { etape.textContent = "Le service se réveille, cela peut prendre jusqu'à une minute."; }, 12000);
+    var t1 = 0, t2 = 0;
     var historique = conversation.filter(function (e) { return e.reponse; }).slice(-MAX_HIST)
       .map(function (e) { return { question: e.question, reponse: e.reponse }; });
     fetch(API + "/assistant", { method: "POST", headers: { "Content-Type": "application/json" },
@@ -296,13 +298,13 @@
         conversation.push(e); sauver();
         defiler(bulleAssistant(contenuReponse(e)));
         if (r.questions_restantes_aujourdhui != null) {
-          aquota.textContent = r.questions_restantes_aujourdhui + " question(s) gratuite(s) restante(s) aujourd'hui";
+          aquota.textContent = r.questions_restantes_aujourdhui + (r.questions_restantes_aujourdhui > 1 ? " questions gratuites restantes" : " question gratuite restante") + " aujourd'hui";
         }
         try { if (window.umami) window.umami.track("assistant", { genere: !!r.genere, suivi: historique.length > 0 }); } catch (err) {}
       })
       .catch(function (err) {
         attente.remove();
-        bulleAssistant('<p class="erreur">' + esc(typeof err.message === "string" ? err.message : "La réponse a échoué. Réessayez dans un instant.") + "</p>", "msg-erreur");
+        bulleAssistant('<p>' + esc(typeof err.message === "string" ? err.message : "La réponse a échoué. Réessayez dans un instant.") + "</p>", "msg-erreur");
         if (!aq.value) { aq.value = question; ajuster(); }
       })
       .then(function () { clearTimeout(t1); clearTimeout(t2); enCours = false; abouton.disabled = false; majEtat(); });
@@ -326,11 +328,21 @@
       if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); poser(aq.value); }
     });
     document.querySelectorAll("#aexemples button").forEach(function (b) {
-      b.addEventListener("click", function () { poser(b.textContent); });
+      b.addEventListener("click", function () { poser(b.dataset.q || b.textContent); });
+    });
+    // PDF et dictée : réservés aux offres payantes (bientôt)
+    var proTimer;
+    document.querySelectorAll(".outil[data-pro]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        apro.textContent = b.dataset.pro + " : inclus dans les offres Éco et Pro, bientôt disponibles.";
+        apro.hidden = false;
+        clearTimeout(proTimer);
+        proTimer = setTimeout(function () { apro.hidden = true; }, 3500);
+      });
     });
     if (anouveau) anouveau.addEventListener("click", function () {
       conversation = []; sauver();
-      afil.querySelectorAll(".msg:not(.msg-accueil)").forEach(function (m) { m.remove(); });
+      afil.innerHTML = "";
       majEtat(); aq.focus();
     });
   }
