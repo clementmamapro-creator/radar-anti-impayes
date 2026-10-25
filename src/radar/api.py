@@ -15,6 +15,7 @@ import time
 from fastapi import FastAPI, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import __version__
@@ -24,6 +25,7 @@ from .store import DuckDBStore
 from .telemetrie import TELEMETRIE
 
 SITE_DIR = Path(os.getenv("RADAR_SITE_DIR", ROOT / "site"))
+PAGES = ("a-propos", "sous-le-capot", "mentions-legales", "confidentialite")
 
 app = FastAPI(
     title="Acquit Solutions API",
@@ -51,7 +53,7 @@ async def mesurer(request: Request, call_next):
     finally:
         route = request.scope.get("route")
         chemin = getattr(route, "path", None)
-        nom = chemin if chemin and chemin != "/" else "site"
+        nom = chemin if chemin and chemin != "/" and chemin.strip("/").removesuffix(".html") not in PAGES else "site"
         TELEMETRIE.enregistrer(nom, statut, (time.perf_counter() - debut) * 1000)
 
 
@@ -280,6 +282,18 @@ def model_info() -> dict:
     if not path.exists():
         raise HTTPException(status_code=404, detail="Aucun modèle entraîné.")
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+# Adresses propres : /a-propos plutôt que /a-propos.html (l'ancienne adresse redirige, 301)
+for _page in PAGES:
+    def _servir(page: str = _page) -> FileResponse:
+        return FileResponse(SITE_DIR / f"{page}.html")
+
+    def _rediriger(page: str = _page) -> RedirectResponse:
+        return RedirectResponse(f"/{page}", status_code=301)
+
+    app.add_api_route(f"/{_page}", _servir, include_in_schema=False)
+    app.add_api_route(f"/{_page}.html", _rediriger, include_in_schema=False)
 
 
 # Le site vitrine, servi par la même application tant qu'il n'est pas hébergé à part.

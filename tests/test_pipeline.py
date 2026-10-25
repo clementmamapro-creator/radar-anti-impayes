@@ -222,3 +222,15 @@ def test_cache_des_scores(monkeypatch):
     a = c.get("/score/123456789").json()
     b = c.get("/score/123 456 789").json()
     assert a == b and appels == ["123456789"]  # second appel servi par le cache
+
+
+def test_adresses_propres_des_pages():
+    from fastapi.testclient import TestClient
+
+    from radar import api
+
+    c = TestClient(api.app)
+    r = c.get("/a-propos")
+    assert r.status_code == 200 and "À propos" in r.text
+    r = c.get("/a-propos.html", follow_redirects=False)
+    assert r.status_code == 301 and r.headers["location"] == "/a-propos"
