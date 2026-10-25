@@ -533,7 +533,10 @@ body.page-capot .pied { background: #080E1A; }
 #fcarte .dep { stroke: var(--r-fond); stroke-width: 1.2; cursor: pointer; opacity: 0; transform: scale(.94); transform-origin: center; transform-box: fill-box;
   transition: opacity 600ms ease, transform 700ms cubic-bezier(.2,.8,.2,1), fill 200ms; outline: none; }
 .radar-carte.vivante #fcarte .dep { opacity: 1; transform: none; }
-#fcarte .dep:hover, #fcarte .dep:focus { stroke: #fff; stroke-width: 2.5; }
+#fcarte .dep:focus { stroke: #fff; stroke-width: 2.5; }
+.radar-carte.vivante #fcarte.focus .dep { opacity: .4; }
+.radar-carte.vivante #fcarte.focus .dep.actif { opacity: 1; stroke: #FFF4E0; stroke-width: 3; transform: scale(1.06);
+  filter: brightness(1.7) saturate(1.2) drop-shadow(0 0 10px rgba(255, 200, 120, .8)) drop-shadow(0 6px 14px rgba(0, 0, 0, .5)); }
 #fcarte .c0, .radar-legende .c0 { fill: var(--r0); background: var(--r0); }
 #fcarte .c1, .radar-legende .c1 { fill: var(--r1); background: var(--r1); }
 #fcarte .c2, .radar-legende .c2 { fill: var(--r2); background: var(--r2); }
@@ -598,5 +601,5 @@ body.page-capot .pied { background: #080E1A; }
 .radar-info .spark circle { fill: #FFD9A0; }
 .radar-mois .repere { opacity: 0; } .radar-mois .repere.vu { opacity: 1; }
 .radar-mois .repere { fill: #FFD9A0; transition: cx 300ms ease, cy 300ms ease; }
-#fcarte .dep { transition: opacity 600ms ease, transform 700ms cubic-bezier(.2,.8,.2,1), fill 350ms ease; }
+#fcarte .dep { transition: opacity 250ms ease, transform 250ms cubic-bezier(.2,.8,.2,1), fill 350ms ease, filter 250ms ease; }
 .radar-info.flottante { position: absolute; top: 0; left: 0; bottom: auto; pointer-events: none; z-index: 5; box-shadow: 0 12px 32px rgba(0,0,0,.45); transition: transform 60ms linear; }

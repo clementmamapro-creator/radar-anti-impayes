@@ -60,8 +60,16 @@
       return etat.idx == null ? ((deps[code] || {}).n || 0) : ((series[code] || [])[etat.idx] || 0);
     }
 
+    // Surbrillance : le département choisi ressort, les autres s'estompent
+    function surligner(code) {
+      codes.forEach(function (c) { if (chemins[c]) chemins[c].classList.toggle("actif", c === code); });
+      svg.classList.toggle("focus", !!code);
+    }
+    function fermer() { etat.survol = null; info.hidden = true; surligner(null); }
+
     function montrer(code) {
       etat.survol = code;
+      surligner(code);
       var d = geo.dep[code], v = deps[code] || {}, ev = v.evolution_pct;
       var periode = etat.idx == null ? "en 12 mois" : "en " + libMois(mois[etat.idx]);
       info.innerHTML = "<b>" + d.n + " (" + code + ")</b><span><strong>" + fr(valeur(code)) + "</strong> jugements d'ouverture " + periode + "</span>" +
@@ -91,17 +99,16 @@
     }
     function cacher() {
       if (!souris) return;
-      etat.survol = null;
-      info.hidden = true;
+      fermer();
     }
     document.addEventListener("click", function (e) {
-      if (!zone.contains(e.target) || e.target === svg) { etat.survol = null; info.hidden = true; }
+      if (!zone.contains(e.target) || e.target === svg) { fermer(); }
     });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { etat.survol = null; info.hidden = true; } });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") fermer(); });
 
     function colorer() {
       var s = etat.idx == null ? seuilsAn : seuilsMois;
-      codes.forEach(function (c) { chemins[c].setAttribute("class", "dep c" + classe(valeur(c), s)); });
+      codes.forEach(function (c) { chemins[c].setAttribute("class", "dep c" + classe(valeur(c), s) + (c === etat.survol ? " actif" : "")); });
       var bornes = [0].concat(s);
       document.getElementById("flegende").innerHTML = "<span>Jugements d'ouverture " + (etat.idx == null ? "sur 12 mois" : "par mois") + "</span>" +
         [0, 1, 2, 3, 4].map(function (k) {
