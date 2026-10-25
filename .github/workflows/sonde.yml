@@ -1,0 +1,20 @@
+name: Sonde
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/sonde-trigger"]
+permissions:
+  contents: write
+jobs:
+  sonde:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install httpx && python scripts/sonde_bodacc.py > /tmp/sonde.json
+      - env:
+          TOKEN: ${{ github.token }}
+        run: |
+          mkdir /tmp/pub && cd /tmp/pub && git init -q && git checkout -q -b sonde-results && cp /tmp/sonde.json .
+          git -c user.name=gha -c user.email=a@b add . && git -c user.name=gha -c user.email=a@b commit -qm sonde
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" sonde-results
