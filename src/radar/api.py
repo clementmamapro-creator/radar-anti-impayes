@@ -148,10 +148,18 @@ def health() -> dict:
     }
 
 
-@lru_cache
+_VOLUMES: dict = {}
+
+
 def _volumes() -> dict:
-    store = get_scorer().store
-    return store.volumes() if hasattr(store, "volumes") else {}
+    """Taille de la base de service, lue une fois ; vide si la base n'est pas encore là."""
+    if not _VOLUMES:
+        try:
+            store = get_scorer().store
+            _VOLUMES.update(store.volumes() if hasattr(store, "volumes") else {})
+        except Exception:  # base absente (CI, premier démarrage) : la page s'affiche quand même
+            return {}
+    return _VOLUMES
 
 
 def _lire_json(path: Path) -> dict:
