@@ -1,0 +1,10 @@
+INFO HTTP Request: GET https://bodacc-datadila.opendatasoft.com/api/explore/v2.1/catalog/datasets/annonces-commerciales "HTTP/1.1 200 OK"
+INFO HTTP Request: GET https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/ratios_inpi_bce "HTTP/1.1 200 OK"
+
+== bodacc : 32 colonnes publiées
+  acte, commercant, cp, dateparution, departement_nom_officiel, depot, divers, familleavis, familleavis_lib, id, ispdf_unitaire, jugement, listeetablissements, listepersonnes, listeprecedentexploitant, listeprecedentproprietaire, modificationsgenerales, numeroannonce, numerodepartement, parution, parutionavisprecedent, pdf_parution_subfolder, publicationavis, radiationaurcs, region_code, region_nom_officiel, registre, tribunal, typeavis, typeavis_lib, url_complete, ville
+  ✓ Mapping complet
+
+== ratios : 23 colonnes publiées
+  autonomie_financiere, caf_sur_ca, capacite_de_remboursement, chiffre_d_affaires, confidentiality, couverture_des_interets, credit_clients_jours, credit_fournisseurs_jours, date_cloture_exercice, ebe, ebit, marge_brute, marge_ebe, poids_bfr_exploitation_sur_ca, poids_bfr_exploitation_sur_ca_jours, ratio_de_liquidite, ratio_de_vetuste, resultat_courant_avant_impots_sur_ca, resultat_net, rotation_des_stocks_jours, siren, taux_d_endettement, type_bilan
+  ✓ Mapping complet

@@ -1,0 +1,15 @@
+run: 40312896569
+date: 2026-10-26T12:58:03Z
+commit: d411fdae1c57ebcbd45f7cdf2768023c7f3b7226
+inspect: success
+ingest: success
+build: success
+train: success
+summary: success
+upload: success
+corpus: success
+rageval: success
+export: success
+release: success
+/dev/root       145G   63G   83G  43% /
+Mem:           15988        1019        9317          52        6050       14968

@@ -1,0 +1,20 @@
+{
+  "baseline_logreg": {
+    "roc_auc": 0.7435,
+    "pr_auc": 0.0218,
+    "brier": 0.20143,
+    "recall_top10": 0.3242
+  },
+  "lightgbm": {
+    "roc_auc": 0.8235,
+    "pr_auc": 0.0515,
+    "brier": 0.1588,
+    "recall_top10": 0.497
+  },
+  "lightgbm_calibre": {
+    "roc_auc": 0.8253,
+    "pr_auc": 0.0519,
+    "brier": 0.0086,
+    "recall_top10": 0.4976
+  }
+}

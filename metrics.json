@@ -1,0 +1,120 @@
+{
+  "entraine_le": "2026-10-26T11:50:32+00:00",
+  "features": [
+    "chiffre_affaires",
+    "marge_ebe",
+    "resultat_net",
+    "taux_endettement",
+    "ratio_liquidite",
+    "autonomie_financiere",
+    "caf_sur_ca",
+    "capacite_remboursement",
+    "couverture_interets",
+    "credit_clients_jours",
+    "credit_fournisseurs_jours",
+    "poids_bfr_sur_ca",
+    "evolution_ca",
+    "nb_bilans"
+  ],
+  "train": {
+    "lignes": 5727444,
+    "taux_defaillance": 0.007,
+    "annees": [
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "test": {
+    "lignes": 599006,
+    "taux_defaillance": 0.0089,
+    "annees": [
+      2025
+    ]
+  },
+  "metrics": {
+    "baseline_logreg": {
+      "roc_auc": 0.7435,
+      "pr_auc": 0.0218,
+      "brier": 0.20143,
+      "recall_top10": 0.3242
+    },
+    "lightgbm": {
+      "roc_auc": 0.8235,
+      "pr_auc": 0.0515,
+      "brier": 0.1588,
+      "recall_top10": 0.497
+    },
+    "lightgbm_calibre": {
+      "roc_auc": 0.8253,
+      "pr_auc": 0.0519,
+      "brier": 0.0086,
+      "recall_top10": 0.4976
+    }
+  },
+  "distribution_probabilites_test": {
+    "p50": 0.00243,
+    "p70": 0.00565,
+    "p80": 0.0088,
+    "p90": 0.01737,
+    "p95": 0.02926,
+    "p99": 0.06614
+  },
+  "niveaux_actuels": {
+    "seuils": {
+      "faible": 0.02,
+      "modere": 0.06,
+      "eleve": 1.0
+    },
+    "detail": {
+      "faible": {
+        "part_entreprises": 0.915,
+        "taux_defaillance_observe": 0.0053
+      },
+      "modéré": {
+        "part_entreprises": 0.0727,
+        "taux_defaillance_observe": 0.0402
+      },
+      "élevé": {
+        "part_entreprises": 0.0123,
+        "taux_defaillance_observe": 0.0917
+      }
+    }
+  },
+  "seuils_proposes": {
+    "faible": 0.00565,
+    "modere": 0.02926
+  },
+  "importance": {
+    "ratio_liquidite": 615,
+    "taux_endettement": 605,
+    "poids_bfr_sur_ca": 516,
+    "resultat_net": 486,
+    "autonomie_financiere": 479,
+    "capacite_remboursement": 475,
+    "credit_fournisseurs_jours": 442,
+    "chiffre_affaires": 404,
+    "couverture_interets": 336,
+    "marge_ebe": 325,
+    "evolution_ca": 294,
+    "credit_clients_jours": 281,
+    "caf_sur_ca": 173,
+    "nb_bilans": 169
+  }
+}

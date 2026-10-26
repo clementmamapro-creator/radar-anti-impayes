@@ -1,0 +1,221 @@
+{
+  "reglage": {
+    "bm25": {
+      "questions_evaluees": 40,
+      "rappel@5": 0.925,
+      "reussite@5": 0.975,
+      "mrr": 0.83,
+      "echecs": [
+        {
+          "question": "Comment fonctionne l'injonction de payer ?",
+          "attendus": [
+            "1405",
+            "1407"
+          ],
+          "trouves": [
+            "1412",
+            "1408",
+            "1410",
+            "1422",
+            "1409"
+          ]
+        }
+      ]
+    },
+    "hybride": {
+      "questions_evaluees": 40,
+      "rappel@5": 0.912,
+      "reussite@5": 0.95,
+      "mrr": 0.806,
+      "echecs": [
+        {
+          "question": "Comment envoyer une mise en demeure à un client qui ne paie pas ?",
+          "attendus": [
+            "1344"
+          ],
+          "trouves": [
+            "L441-10",
+            "1231-6",
+            "L125-1",
+            "D441-5",
+            "L441-9"
+          ]
+        },
+        {
+          "question": "Comment fonctionne l'injonction de payer ?",
+          "attendus": [
+            "1405",
+            "1407"
+          ],
+          "trouves": [
+            "1422",
+            "L111-3",
+            "1410",
+            "L441-10",
+            "1411"
+          ]
+        }
+      ]
+    }
+  },
+  "test": {
+    "bm25": {
+      "questions_evaluees": 15,
+      "rappel@5": 0.7,
+      "reussite@5": 0.8,
+      "mrr": 0.426,
+      "echecs": [
+        {
+          "question": "J'ai raté la date limite pour me déclarer auprès du mandataire judiciaire.",
+          "attendus": [
+            "L622-26"
+          ],
+          "trouves": [
+            "L622-24",
+            "L641-3",
+            "1406",
+            "L441-9",
+            "R622-24"
+          ]
+        },
+        {
+          "question": "Au bout de combien d'années une dette commerciale est-elle éteinte ?",
+          "attendus": [
+            "L110-4",
+            "2224"
+          ],
+          "trouves": [
+            "1343-5",
+            "R622-24",
+            "L441-10",
+            "L441-11"
+          ]
+        },
+        {
+          "question": "Quel courrier envoyer avant d'aller en justice pour une facture ?",
+          "attendus": [
+            "1344",
+            "1344-1"
+          ],
+          "trouves": [
+            "L441-11",
+            "L441-9",
+            "L125-1",
+            "L441-10",
+            "L110-4"
+          ]
+        }
+      ]
+    },
+    "hybride": {
+      "questions_evaluees": 15,
+      "rappel@5": 0.9,
+      "reussite@5": 0.933,
+      "mrr": 0.702,
+      "echecs": [
+        {
+          "question": "Quel courrier envoyer avant d'aller en justice pour une facture ?",
+          "attendus": [
+            "1344",
+            "1344-1"
+          ],
+          "trouves": [
+            "L441-10",
+            "L441-9",
+            "L125-1",
+            "1231-6",
+            "D441-5"
+          ]
+        }
+      ]
+    }
+  },
+  "generation": {
+    "reponses_generees": 10,
+    "taux_citation": 1.0,
+    "taux_fidelite": 1.0,
+    "taux_article_attendu_cite": 0.9,
+    "exemples": [
+      {
+        "question": "Quel est le délai de paiement maximum entre deux entreprises ?",
+        "citee": true,
+        "fidele": true,
+        "attendu_cite": true,
+        "reponse": "Le principe général est le suivant : entre deux entreprises, le délai de règlement ne peut dépasser **60 jours après la date d'émission de la facture**, sauf dispositions contraires ou accord entre les parties. Le délai de 30 jours court en revanche à compter de la réception des marchandises ou de l'exécution de la prestation, lorsque rien d'autre n'est convenu [Code de commerce, art. L441-10].\n\nPlusieurs exceptions existent :\n- **45 jours fin de mois** maximum, si le contrat le stipule expressément et sans abus manifeste [Code de commerce, art. L441-10] ;\n- **45 jours** après émission pour une facture périodique [Code de commerce, art. L441-10] ;\n- des délais spécifiques dans certains secteurs (transport routier, agroalimentaire, jouets, etc.), par exemple **30 jours** après émission pour le transport routier de marchandises [Code de commerce, art. L441-11].\n\n**Étapes concrètes :**\n1. Vérifiez votre contrat ou vos conditions générales de vente : le délai convenu y figure-t-il ?\n2. Contrôlez que votre facture mentionne la date de règlement, le taux des pénalités de retard et le montant de l'indemnité forfaitaire de **40 €** [Code de commerce, art. L441-9 ; art. D441-5].\n3. En cas de retard, les pénalités sont exigibles dès le lendemain de la date de règlement, sans rappel nécessaire [Code de commerce, art. L441-10].\n\nLes textes fournis ne permettent pas de trancher tous les cas particuliers, notamment les règles propres à votre secteur ou la validité d'une clause précise. Pour cela, rapprochez-vous de votre expert-comptable ou d'un avocat spécialisé en droit commercial.",
+        "fin": "end_turn"
+      },
+      {
+        "question": "Les pénalités de retard sont-elles dues même si je n'envoie pas de rappel ?",
+        "citee": true,
+        "fidele": true,
+        "attendu_cite": true,
+        "reponse": "Oui, selon les textes fournis, les pénalités de retard sont dues sans rappel de votre part. L'article L. 441-10 précise qu'elles « sont exigibles sans qu'un rappel soit nécessaire » [Code de commerce, art. L441-10]. Elles courent donc dès le lendemain de la date de règlement inscrite sur votre facture.\n\nPour que cela fonctionne, il faut toutefois que votre facture mentionne « la date à laquelle le règlement doit intervenir », « le taux des pénalités exigibles le jour suivant la date de règlement » et le montant de l'indemnité forfaitaire pour frais de recouvrement [Code de commerce, art. L441-9]. Une facture incomplète sur ces points fragilise votre position.\n\nLe taux est au minimum égal à trois fois le taux d'intérêt légal, et son calcul est encadré par la loi [Code de commerce, art. L441-10]. Le montant de l'indemnité forfaitaire pour frais de recouvrement est fixé à 40 euros [Code de commerce, art. D441-5]. Si vos frais réels de recouvrement dépassent ce montant, vous pouvez demander une indemnisation complémentaire, sur justification [Code de commerce, art. L441-10].\n\nÉtapes concrètes :\n1. Vérifiez que vos factures mentionnent la date d'échéance, le taux des pénalités et l'indemnité de 40 euros.\n2. Gardez la trace de la date d'échéance et du paiement attendu.\n3. Si le paiement n'arrive pas, adressez une mise en demeure écrite. Elle fait courir l'intérêt au taux légal sur votre créance, même sans justifier d'une perte [Code civil, art. 1231-6].\n4. Conservez les justificatifs de vos frais de recouvrement, au cas où ils dépasseraient 40 euros.\n\nCe qui reste à vérifier : les textes fournis ne précisent pas le taux exact applicable à votre situation ni les conditions de calcul concrètes. Votre expert-comptable ou un commissaire de justice pourra vous confirmer ces points avant toute procédure.",
+        "fin": "end_turn"
+      },
+      {
+        "question": "Existe-t-il des délais de paiement particuliers pour certains secteurs comme le transport ?",
+        "citee": true,
+        "fidele": true,
+        "attendu_cite": false,
+        "reponse": "Oui, pour certains secteurs, la loi prévoit des délais dérogatoires, et le transport routier de marchandises en fait partie.\n\nLe délai de principe est de 60 jours après la date d'émission de la facture, sauf accord contraire entre les parties [Code de commerce, art. L441-10]. Mais pour le transport routier de marchandises, la location de véhicules avec ou sans conducteur, la commission de transport, ainsi que les activités de transitaire, d'agent maritime, de fret aérien, de courtier de fret et de commissionnaire en douane, le délai maximum est de 30 jours après la date d'émission de la facture [Code de commerce, art. L441-11, II, 5°].\n\nCe délai plus court s'applique en l'absence de stipulation contraire, mais il peut aussi être prévu par les conditions de vente.\n\nPour les autres secteurs cités par ce même article (agroalimentaire, agroéquipement, cuir, horlogerie, jouets, articles de sport), des délais spécifiques existent également, parfois de 54 à 110 jours, souvent calculés « fin de mois » ou « nets » [Code de commerce, art. L441-11, II]. Ils doivent être expressément stipulés au contrat et ne pas constituer un abus manifeste [Code de commerce, art. L441-11, III].\n\nÉtapes concrètes :\n1. Vérifiez que votre activité relève bien du secteur concerné et que votre contrat ou vos conditions générales mentionnent le délai applicable.\n2. Assurez-vous que la facture indique la date de règlement, le taux des pénalités de retard et le montant de l'indemnité forfaitaire de 40 € [Code de commerce, art. L441-9, I ; art. D441-5].\n3. En cas de retard, les pénalités sont exigibles dès le lendemain de la date de règlement, sans rappel nécessaire [Code de commerce, art. L441-10, II].\n\nLes textes fournis ne me permettent pas de dire si votre propre situation précise entre dans ce cadre. Pour le vérifier, rapprochez-vous de votre expert-comptable ou d'un avocat spécialisé.",
+        "fin": "end_turn"
+      },
+      {
+        "question": "J'ai oublié de déclarer ma créance dans les délais, est-ce perdu ?",
+        "citee": true,
+        "fidele": true,
+        "attendu_cite": true,
+        "reponse": "Ce que disent les textes : un créancier qui n'a pas déclaré sa créance dans les délais n'est pas, en principe, admis aux répartitions ni aux dividendes [Code de commerce, art. L622-26]. Mais la loi prévoit un recours : le juge-commissaire peut le relever de sa forclusion s'il établit que sa défaillance n'est pas due à son fait [Code de commerce, art. L622-26]. Vous ne pouvez alors concourir que pour les distributions postérieures à votre demande.\n\nLe délai pour agir est strict : l'action en relevé de forclusion ne peut être exercée que dans un délai de six mois, qui court à compter de la publication du jugement d'ouverture [Code de commerce, art. L622-26]. Par exception, si vous établissez que vous étiez dans l'impossibilité de connaître l'obligation du débiteur avant l'expiration de ce délai, il court à partir de la date à laquelle il est établi que vous ne pouviez ignorer votre créance [Code de commerce, art. L622-26]. Pour les délais de déclaration eux-mêmes, le texte réglementaire fixe deux mois à compter de la publication au BODACC, auxquels s'ajoutent deux mois pour les créanciers ne demeurant pas sur le territoire concerné [Code de commerce, art. R622-24].\n\nÉtapes concrètes :\n1. Vérifiez la date de publication du jugement au BODACC et calculez vos délais.\n2. Rassemblez les pièces prouvant votre créance (factures, devis, bons de commande, échanges avec le débiteur).\n3. Si vous êtes encore dans le délai de six mois, déposez rapidement une demande de relevé de forclusion auprès du juge-commissaire, en expliquant les raisons de votre défaillance.\n4. Vérifiez si l'une des exceptions s'applique à votre situation.\n\nCe qui reste à vérifier : la façon dont le juge appréciera votre « défaillance non due à votre fait » dépend de votre dossier, et les textes fournis ne détaillent pas la procédure exacte devant le juge-commissaire. Je vous recommande de consulter sans attendre un avocat ou un mandataire judiciaire, qui pourra examiner votre situation précise et les délais applicables.",
+        "fin": "end_turn"
+      },
+      {
+        "question": "Une simple lettre suffit-elle pour mettre en demeure mon débiteur ?",
+        "citee": true,
+        "fidele": true,
+        "attendu_cite": true,
+        "reponse": "Pour répondre directement : une simple lettre peut suffire, à condition qu'elle constitue une « sommation ou un acte portant interpellation suffisante ». Les textes fournis ne précisent pas la forme exacte de ce courrier, ni s'il doit être envoyé en recommandé. Ce point reste donc à vérifier.\n\nLe Code civil prévoit que le débiteur est mis en demeure de payer soit par une sommation ou un acte portant interpellation suffisante, soit, si le contrat le prévoit, par la seule exigibilité de l'obligation [Code civil, art. 1344]. Autrement dit, si votre contrat ou vos conditions de vente prévoient que la simple échéance vaut mise en demeure, vous n'avez pas besoin d'envoyer de courrier.\n\nUne fois la mise en demeure faite, les conséquences sont importantes :\n- L'intérêt au taux légal court à compter de cette mise en demeure, et vous n'avez pas à justifier d'un préjudice [Code civil, art. 1231-6 et art. 1344-1].\n- Des pénalités de retard, dont le taux est encadré par la loi, sont exigibles dès le lendemain de la date de règlement figurant sur la facture, sans rappel nécessaire [Code de commerce, art. L441-10, II].\n- Une indemnité forfaitaire pour frais de recouvrement de 40 euros est due de plein droit par le débiteur en retard [Code de commerce, art. L441-10, II et art. D441-5].\n\nÉtapes concrètes :\n1. Vérifiez vos conditions de vente et votre contrat : prévoient-ils la mise en demeure automatique ?\n2. Si ce n'est pas le cas, adressez une lettre de relance précise (montant, facture concernée, date d'échéance) et demandez le paiement sous un délai déterminé.\n3. Conservez une preuve de l'envoi et de la réception, par exemple avec un recommandé avec accusé de réception.\n4. Si le retard persiste, un avocat ou un commissaire de justice pourra vous conseiller sur la suite, notamment une injonction de payer.\n\nVotre expert-comptable peut aussi vous aider à vérifier que vos factures mentionnent bien les pénalités et l'indemnité forfaitaire.",
+        "fin": "end_turn"
+      },
+      {
+        "question": "Puis-je arrêter le chantier tant que le client ne paie pas l'acompte ?",
+        "citee": true,
+        "fidele": true,
+        "attendu_cite": true,
+        "reponse": "Oui, en principe, les textes fournis permettent de suspendre votre prestation tant que le client n'exécute pas son obligation de paiement, à condition que ce manquement soit suffisamment grave.\n\nLe Code civil prévoit qu'une partie peut refuser d'exécuter son obligation, même exigible, si l'autre n'exécute pas la sienne et si cette inexécution est suffisamment grave [Code civil, art. 1219]. Il ajoute que la partie envers laquelle l'engagement n'a pas été exécuté peut refuser d'exécuter ou suspendre sa propre obligation [Code civil, art. 1217].\n\nPoints à retenir :\n- La gravité du manquement s'apprécie au cas par cas. Un retard de quelques jours sur un acompte prévu au contrat peut ne pas suffire ; un impayé persistant, plus encore s'il est acté par écrit, sera plus facilement considéré comme grave. Les textes fournis ne fixent pas de seuil chiffré.\n- Il est préférable d'agir avec méthode :\n\n1. Vérifiez le contrat ou le devis : date et montant de l'acompte, conditions de paiement.\n2. Adressez une mise en demeure écrite (lettre recommandée avec accusé de réception) rappelant le montant dû et un délai raisonnable.\n3. Informez le client, par écrit, que vous suspendez les travaux jusqu'au paiement, en citant la clause ou l'article 1219.\n4. Conservez toutes les preuves : devis signé, factures, échanges.\n\nPour les sommes en retard, vous pouvez aussi réclamer des pénalités et une indemnité forfaitaire pour frais de recouvrement, qui sont dues de plein droit [Code de commerce, art. L441-10]. Des intérêts au taux légal courent à compter de la mise en demeure [Code civil, art. 1231-6].\n\nPour évaluer la gravité du manquement dans votre situation précise, ou si le client conteste, rapprochez-vous d'un avocat ou d'un expert-comptable.",
+        "fin": "end_turn"
+      },
+      {
+        "question": "Quel tribunal saisir pour une injonction de payer contre une entreprise ?",
+        "citee": true,
+        "fidele": true,
+        "attendu_cite": true,
+        "reponse": "Pour une injonction de payer contre une entreprise, les articles fournis permettent d'affirmer ceci. La demande est portée devant le juge des contentieux de la protection ou devant le président du tribunal judiciaire ou du tribunal de commerce, selon le cas, dans la limite de leur compétence d'attribution [Code de procédure civile, art. 1406]. Le juge territorialement compétent est celui du lieu où demeure le ou l'un des débiteurs poursuivis [Code de procédure civile, art. 1406]. Cette règle est d'ordre public : une clause contraire du contrat est réputée non écrite [Code de procédure civile, art. 1406].\n\nPour agir, voici les étapes concrètes :\n\n1. **Identifier le juge compétent** : vérifiez le siège de l'entreprise débitrice (son lieu de demeure). Si le litige relève d'une compétence particulière, faites-vous confirmer le bon tribunal auprès du greffe ou d'un professionnel.\n2. **Préparer la requête** : vous pouvez demander, dans la requête, qu'en cas d'opposition l'affaire soit renvoyée devant la juridiction que vous estimez compétente [Code de procédure civile, art. 1408].\n3. **Suivre la procédure** : si la requête est acceptée, le greffe vous remet une copie certifiée conforme de l'ordonnance revêtue de la formule exécutoire [Code de procédure civile, art. 1410].\n4. **Anticiper l'opposition** : le débiteur peut s'opposer à l'ordonnance [Code de procédure civile, art. 1412]. Dans ce cas, l'affaire sera portée devant la juridiction compétente.\n\nCe qui reste à vérifier : les conditions de recevabilité de la requête, les délais et le montant éventuel de la procédure ne figurent pas dans les textes disponibles. Pour une situation précise, rapprochez-vous d'un avocat ou d'un commissaire de justice, ou de votre expert-comptable.",
+        "fin": "end_turn"
+      },
+      {
+        "question": "Combien de temps mon débiteur a-t-il pour faire opposition ?",
+        "citee": true,
+        "fidele": true,
+        "attendu_cite": true,
+        "reponse": "Le débiteur dispose en principe d'un mois pour faire opposition à l'ordonnance d'injonction de payer. Ce délai court à partir de la signification de l'ordonnance [Code de procédure civile, art. 1416].\n\nDeux précisions importantes :\n\n- **Si la signification n'a pas été faite à personne**, le délai est plus long : l'opposition reste possible jusqu'à un mois après le premier acte signifié à personne ou, à défaut, après la première mesure d'exécution qui rend indisponibles tout ou partie de ses biens [Code de procédure civile, art. 1416].\n- **L'opposition est suspensive** : formée dans ce délai, elle suspend l'exécution. Le délai d'opposition lui-même est également suspensif d'exécution [Code de procédure civile, art. 1422].\n\nÉtapes concrètes pour vous :\n\n1. **Vérifiez la date de signification** de l'ordonnance, qui est le point de départ du délai. Elle figure sur l'acte remis par le commissaire de justice.\n2. **Surveillez la réception de l'avis** de l'opposition éventuelle. Si aucune opposition n'est reçue dans les deux mois suivant la signification, vous pouvez poursuivre l'exécution forcée [Code de procédure civile, art. 1422].\n3. **Vérifiez que l'ordonnance a bien été signifiée** dans les trois mois de sa date, faute de quoi elle devient non avenue [Code de procédure civile, art. 1411].\n4. **En cas d'opposition**, vous pouvez avoir demandé dans votre requête un renvoi immédiat devant la juridiction de votre choix [Code de procédure civile, art. 1408]. Pour la suite de la procédure, rapprochez-vous d'un avocat.\n\nLes textes fournis ne précisent pas comment est calculé le point de départ si la signification est irrégulière. Pour ce cas, consultez un avocat ou votre commissaire de justice.",
+        "fin": "end_turn"
+      },
+      {
+        "question": "Un fournisseur peut-il exiger d'être payé en 120 jours ?",
+        "citee": true,
+        "fidele": true,
+        "attendu_cite": true,
+        "reponse": "Non, en principe, un délai de 120 jours n'est pas autorisé pour une relation commerciale classique entre professionnels, selon les textes fournis.\n\nLe délai de paiement ne peut dépasser trente jours après la réception des marchandises ou l'exécution de la prestation, sauf stipulation contraire dans les conditions de vente ou accord entre les parties [Code de commerce, art. L441-10]. Le délai convenu ne peut en aucun cas dépasser soixante jours après la date d'émission de la facture [Code de commerce, art. L441-10]. Une dérogation existe pour un délai de quarante-cinq jours fin de mois, à condition d'être expressément stipulée par contrat et de ne pas constituer un abus manifeste [Code de commerce, art. L441-10].\n\nDes délais plus longs ne sont admis que pour certains secteurs listés, comme les produits agricoles non périssables (soixante jours après la facture) ou l'agroéquipement (jusqu'à cent-dix jours fin de mois pour certains matériels agricoles), et à condition qu'ils soient prévus par contrat [Code de commerce, art. L441-11]. Votre fournisseur doit donc relever de l'un de ces cas pour pouvoir invoquer 120 jours.\n\nÉtapes concrètes :\n1. Vérifiez votre contrat et vos conditions générales de vente : y figure-t-il un délai, et dans quel secteur exercez-vous ?\n2. Contrôlez vos factures : elles doivent mentionner la date de règlement, le taux des pénalités de retard et le montant de l'indemnité forfaitaire de recouvrement [Code de commerce, art. L441-9].\n3. Si le délai dépasse les seuils ci-dessus sans justification sectorielle ni clause expresse, vous pouvez le contester par écrit.\n4. Un fournisseur qui impose un délai non conforme s'expose à une amende administrative [Code de commerce, art. L441-16].\n\nLes textes fournis ne permettent pas de trancher si votre situation relève d'un secteur dérogatoire ni d'apprécier l'existence d'un « abus manifeste ». Pour cela, rapprochez-vous de votre expert-comptable ou d'un avocat spécialisé en droit commercial.",
+        "fin": "end_turn"
+      },
+      {
+        "question": "J'ai raté la date limite pour me déclarer auprès du mandataire judiciaire.",
+        "citee": true,
+        "fidele": true,
+        "attendu_cite": true,
+        "reponse": "Je comprends votre inquiétude, et il est important d'agir rapidement. Les textes disponibles permettent de répondre en partie.\n\nLe principe est que, sans déclaration dans les délais, vous n'êtes pas admis dans les répartitions et dividendes, sauf si le juge-commissaire vous relève de cette forclusion. Vous pouvez être relevé si vous établissez que votre défaillance n'est pas due à votre fait, ou qu'elle résulte d'une omission du débiteur dans la liste de ses créanciers [Code de commerce, art. L622-26]. Dans ce cas, vous ne pouvez concourir que pour les distributions postérieures à votre demande [Code de commerce, art. L622-26].\n\nLe délai pour demander ce relevé est limité à six mois. Il court en principe à compter de la publication du jugement d'ouverture, ou, pour un titulaire de sûreté publiée ou lié par un contrat publié, à compter de la réception de l'avis qui lui est donné. Si vous prouvez n'avoir pas pu connaître l'obligation du débiteur dans ce délai, il court à partir de la date où il est établi que vous ne pouviez ignorer votre créance [Code de commerce, art. L622-26].\n\nLes délais de déclaration eux-mêmes sont fixés à deux mois à compter de la publication du jugement au BODACC, avec une majoration de deux mois si le créancier ne demeure pas sur le territoire concerné [Code de commerce, art. R622-24]. Si vous avez reçu un avis personnel, le délai court à compter de sa notification [Code de commerce, art. L622-24].\n\nÉtapes concrètes :\n1. Vérifiez la date de publication du jugement au BODACC et la date de réception éventuelle de l'avis.\n2. Rassemblez les preuves montrant pourquoi vous n'avez pas pu déclarer à temps (courrier non reçu, omission dans la liste du débiteur).\n3. Adressez sans attendre une demande de relevé de forclusion au juge-commissaire, dans le délai de six mois.\n4. Faites-vous accompagner par un avocat ou un commissaire de justice, qui pourra apprécier la recevabilité de votre situation.\n\nJe ne peux pas dire à ce stade si votre demande sera acceptée : cela dépend des faits de votre dossier, que seul le juge-commissaire appréciera.",
+        "fin": "end_turn"
+      }
+    ]
+  }
+}
