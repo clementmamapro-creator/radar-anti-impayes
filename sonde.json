@@ -1,0 +1,82 @@
+{
+ "http://acquit-solutions.fr/": {
+  "status": 301,
+  "vers": "https://acquit-solutions.fr/",
+  "octets": 63,
+  "type": "text/html; charset=utf-8",
+  "cache": null,
+  "gzip": null
+ },
+ "https://www.acquit-solutions.fr/": {
+  "status": 301,
+  "vers": "https://acquit-solutions.fr/",
+  "octets": 63,
+  "type": "text/html; charset=utf-8",
+  "cache": null,
+  "gzip": null
+ },
+ "http://www.acquit-solutions.fr/": {
+  "status": 301,
+  "vers": "https://www.acquit-solutions.fr/",
+  "octets": 67,
+  "type": "text/html; charset=utf-8",
+  "cache": null,
+  "gzip": null
+ },
+ "https://acquit-solutions.fr/": {
+  "status": 200,
+  "vers": null,
+  "octets": 19074,
+  "type": "text/html; charset=utf-8",
+  "cache": null,
+  "gzip": "gzip"
+ },
+ "https://acquit-solutions.fr/index.html": {
+  "status": 301,
+  "vers": "/",
+  "octets": 0,
+  "type": null,
+  "cache": null,
+  "gzip": null
+ },
+ "https://acquit-solutions.fr/a-propos.html": {
+  "status": 301,
+  "vers": "/a-propos",
+  "octets": 0,
+  "type": null,
+  "cache": null,
+  "gzip": null
+ },
+ "https://acquit-solutions.fr/a-propos/": {
+  "status": 301,
+  "vers": "/a-propos",
+  "octets": 0,
+  "type": null,
+  "cache": null,
+  "gzip": null
+ },
+ "https://acquit-solutions.fr/penalites-de-retard": {
+  "status": 200,
+  "vers": null,
+  "octets": 8607,
+  "type": "text/html; charset=utf-8",
+  "cache": null,
+  "gzip": "gzip"
+ },
+ "https://acquit-solutions.onrender.com/": {
+  "status": 301,
+  "vers": "https://acquit-solutions.fr/",
+  "octets": 0,
+  "type": null,
+  "cache": null,
+  "gzip": null
+ },
+ "https://acquit-solutions.fr/sitemap.xml": {
+  "status": 200,
+  "vers": null,
+  "octets": 710,
+  "type": "text/xml; charset=utf-8",
+  "cache": null,
+  "gzip": "gzip"
+ }
+}
