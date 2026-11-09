@@ -1,0 +1,6 @@
+INFO HTTP Request: GET https://echanges.dila.gouv.fr/OPENDATA/LEGI/ "HTTP/1.1 200 OK"
+INFO HTTP Request: GET https://echanges.dila.gouv.fr/OPENDATA/LEGI/Freemium_legi_global_20261108-140000.tar.gz "HTTP/1.1 200 OK"
+INFO HTTP Request: GET https://echanges.dila.gouv.fr/OPENDATA/LEGI/LEGI_20261108-210452.tar.gz "HTTP/1.1 200 OK"
+Export LEGI complet : https://echanges.dila.gouv.fr/OPENDATA/LEGI/Freemium_legi_global_20261108-140000.tar.gz ; mises à jour quotidiennes depuis : 1
+Corpus : 31/35 articles -> /home/runner/work/radar-anti-impayes/radar-anti-impayes/data/corpus.jsonl
+Articles introuvables : L441-9, L441-10, L441-11, 1424
