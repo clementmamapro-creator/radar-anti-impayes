@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon espace · Acquit Solutions</title>
+<meta name="description" content="L'espace client Acquit : votre plan de la semaine, vos demandes, vos publications et la santé de votre secteur.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/acquit-tampon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap">
+<link rel="stylesheet" href="assets/espace.css?v=20261109a">
+<script defer src="assets/vendor/supabase.js?v=2.118.0"></script>
+<script defer src="assets/espace.js?v=20261109a"></script>
+</head>
+<body>
+
+<div id="chargement" class="ecran centre" aria-live="polite">
+  <svg class="tampon tourne" width="40" height="40" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="14" r="9.5" fill="none" stroke="currentColor" stroke-width="1"/><path d="M9.5 14.2l3 3 6-6.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span class="muet">Ouverture de votre espace…</span>
+</div>
+
+<!-- Connexion -->
+<main id="connexion" class="ecran centre" hidden>
+  <div class="carte-connexion">
+    <a class="marque" href="/"><svg width="30" height="30" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="14" r="9.5" fill="none" stroke="currentColor" stroke-width="1"/><path d="M9.5 14.2l3 3 6-6.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Acquit</span></a>
+    <h1>Votre espace</h1>
+    <p class="muet">Recevez un lien de connexion par e-mail. Pas de mot de passe à retenir.</p>
+    <form id="form-connexion" novalidate>
+      <label for="email">Adresse e-mail</label>
+      <input id="email" type="email" autocomplete="email" required placeholder="vous@exemple.fr">
+      <button class="principal" type="submit" id="btn-lien">Recevoir mon lien</button>
+      <p class="erreur" id="erreur-connexion" role="alert" hidden></p>
+    </form>
+    <div id="lien-envoye" class="encart-ok" hidden>
+      <b>Lien envoyé.</b> Ouvrez l'e-mail sur cet appareil et cliquez sur le lien. Pensez à regarder dans les indésirables.
+    </div>
+    <p class="petit muet">Phase pilote gratuite, sur invitation. <a href="/">Retour au site</a></p>
+  </div>
+</main>
+
+<!-- Indisponible -->
+<main id="indispo" class="ecran centre" hidden>
+  <div class="carte-connexion">
+    <h1>Bientôt disponible</h1>
+    <p class="muet">L'espace client est en cours de mise en service. Revenez dans quelques jours.</p>
+    <a class="principal lien-bouton" href="/">Retour au site</a>
+  </div>
+</main>
+
+<!-- Application -->
+<div id="app" class="ecran app" hidden>
+  <nav class="cote" aria-label="Navigation de l'espace">
+    <a class="marque clair" href="#secteur"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="14" r="9.5" fill="none" stroke="currentColor" stroke-width="1"/><path d="M9.5 14.2l3 3 6-6.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Acquit</span></a>
+    <div class="liens">
+      <a class="nav" href="#semaine" data-vue="semaine">Ma semaine <i>bientôt</i></a>
+      <a class="nav" href="#demandes" data-vue="demandes">Demandes <i>bientôt</i></a>
+      <a class="nav" href="#publications" data-vue="publications">Publications <i>bientôt</i></a>
+      <a class="nav" href="#factures" data-vue="factures">Devis et factures <i>bientôt</i></a>
+      <a class="nav" href="#secteur" data-vue="secteur">Mon secteur</a>
+      <a class="nav" href="#profil" data-vue="profil">Mon profil</a>
+    </div>
+    <div class="pied-cote">
+      <span id="nom-entreprise" class="fort"></span>
+      <span id="email-connecte" class="petit"></span>
+      <button type="button" id="deconnexion" class="lien-clair">Se déconnecter</button>
+    </div>
+  </nav>
+
+  <main class="contenu">
+    <!-- Mon secteur -->
+    <section id="vue-secteur" class="vue" hidden>
+      <header class="entete">
+        <span class="muet petit" id="secteur-maj">Données publiques du BODACC</span>
+        <h1>Mon secteur</h1>
+        <p class="muet">Votre département respire-t-il ? Lancez l'évolution ou touchez un département.</p>
+      </header>
+      <div class="tuiles">
+        <div class="tuile"><span class="muet">Votre zone</span><b id="t-zone">—</b><span class="petit muet" id="t-rayon"></span></div>
+        <div class="tuile"><span class="muet">Votre métier</span><b id="t-metier">—</b><span class="petit muet" id="t-ville"></span></div>
+        <div class="tuile"><span class="muet">En France, sur 12 mois</span><b id="t-france">—</b><span class="petit muet" id="t-france-evo"></span></div>
+      </div>
+      <div class="bloc carte-bloc">
+        <div class="carte-col">
+          <svg id="carte" viewBox="0 0 1000 963" role="img" aria-label="Carte des départements"></svg>
+          <div class="lecteur">
+            <button type="button" id="jouer" class="rond" aria-label="Lire l'évolution sur 12 mois"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path id="icone-jouer" d="M7 5v14l12-7z"/></svg></button>
+            <label for="mois" class="masque">Mois affiché</label>
+            <input id="mois" type="range" min="0" max="11" value="11">
+            <span id="mois-lib" class="fort chiffres"></span>
+          </div>
+          <div class="legende" aria-hidden="true"><span>Moins de défaillances</span><i></i><i></i><i></i><i></i><i></i><span>Plus</span></div>
+        </div>
+        <div class="fiche-col">
+          <label for="dep" class="petit fort muet">Département</label>
+          <select id="dep"></select>
+          <div class="fiche" id="fiche" aria-live="polite">
+            <h2 id="f-nom">—</h2>
+            <span class="pastille" id="f-verdict">—</span>
+            <div class="chiffres-fiche">
+              <div><b id="f-n" class="chiffres">—</b><span class="petit muet">défaillances sur 12 mois</span></div>
+              <div><b id="f-evo" class="chiffres">—</b><span class="petit muet">par rapport à l'an dernier</span></div>
+            </div>
+            <div class="barres" id="f-barres" aria-hidden="true"></div>
+            <p class="petit muet" id="f-conseil"></p>
+          </div>
+          <p class="petit muet">Source : annonces du BODACC (DILA), jugements d'ouverture de procédures collectives. Aucune entreprise n'est citée.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profil -->
+    <section id="vue-profil" class="vue" hidden>
+      <header class="entete">
+        <h1 id="profil-titre">Votre entreprise</h1>
+        <p class="muet" id="profil-intro">Ces informations servent à personnaliser votre espace. Vous pouvez les changer à tout moment.</p>
+      </header>
+      <form id="form-profil" class="bloc formulaire" novalidate>
+        <div class="champ"><label for="p-nom">Nom de l'entreprise</label><input id="p-nom" required maxlength="120" autocomplete="organization"></div>
+        <div class="champ"><label for="p-metier">Métier</label><input id="p-metier" required maxlength="120" placeholder="Ex. : vitrerie, plomberie, coiffure à domicile"></div>
+        <div class="deux">
+          <div class="champ"><label for="p-ville">Ville</label><input id="p-ville" maxlength="120" autocomplete="address-level2"></div>
+          <div class="champ"><label for="p-dep">Département</label><select id="p-dep" required></select></div>
+        </div>
+        <div class="deux">
+          <div class="champ"><label for="p-rayon">Rayon d'intervention</label><select id="p-rayon"><option value="5">5 km</option><option value="15" selected>15 km</option><option value="30">30 km</option><option value="50">50 km</option><option value="100">100 km</option></select></div>
+          <div class="champ"><label for="p-ton">Ton de vos messages</label><select id="p-ton"><option value="cordial">Cordial</option><option value="chaleureux">Chaleureux</option><option value="direct">Direct</option></select></div>
+        </div>
+        <div class="actions"><button class="principal" type="submit" id="btn-profil">Enregistrer</button><span id="profil-ok" class="ok" hidden>Enregistré.</span></div>
+        <p class="erreur" id="erreur-profil" role="alert" hidden></p>
+      </form>
+      <p class="petit muet">Connecté avec <span id="email-profil"></span> · <button type="button" id="deconnexion-2" class="lien-deco">Se déconnecter</button></p>
+    </section>
+
+    <!-- Fonctions à venir -->
+    <section id="vue-bientot" class="vue" hidden>
+      <header class="entete"><h1 id="bientot-titre">Bientôt</h1><p class="muet" id="bientot-texte"></p></header>
+      <div class="bloc"><p>Cette partie arrive dans les prochaines semaines. En attendant, découvrez <a href="#secteur">la santé de votre secteur</a>.</p></div>
+    </section>
+  </main>
+</div>
+
+</body>
+</html>

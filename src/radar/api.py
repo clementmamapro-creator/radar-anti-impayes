@@ -26,7 +26,7 @@ from .store import DuckDBStore
 from .telemetrie import TELEMETRIE
 
 SITE_DIR = Path(os.getenv("RADAR_SITE_DIR", ROOT / "site"))
-PAGES = ("a-propos", "sous-le-capot", "mentions-legales", "confidentialite", "penalites-de-retard")
+PAGES = ("a-propos", "sous-le-capot", "mentions-legales", "confidentialite", "penalites-de-retard", "espace")
 
 app = FastAPI(
     title="Acquit Solutions API",
@@ -257,6 +257,37 @@ def carte_defaillances() -> dict:
     if data is None:
         raise HTTPException(status_code=503, detail="Carte momentanément indisponible.")
     return data
+
+
+@app.get("/espace/config")
+def espace_config() -> dict:
+    """Adresse du projet Supabase et clé publique, pour la connexion à l'espace client."""
+    from .espace import config_publique
+
+    conf = config_publique()
+    if conf is None:
+        raise HTTPException(status_code=503, detail="Espace client pas encore configuré.")
+    return conf
+
+
+@app.get("/secteur/{departement}")
+def secteur_departement(departement: str) -> dict:
+    """Santé d'un département : défaillances sur 12 mois, évolution et verdict (BODACC)."""
+    import re
+
+    from .carte import carte
+    from .espace import secteur
+
+    code = departement.upper()
+    if not re.fullmatch(r"\d{2}|2A|2B|97\d", code):
+        raise HTTPException(status_code=422, detail="Code département invalide.")
+    data = carte(load_config())
+    if data is None:
+        raise HTTPException(status_code=503, detail="Données momentanément indisponibles.")
+    res = secteur(data, code)
+    if res is None:
+        raise HTTPException(status_code=404, detail="Aucune donnée pour ce département.")
+    return res
 
 
 @app.get("/exemples")

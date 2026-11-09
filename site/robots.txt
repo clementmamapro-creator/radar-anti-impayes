@@ -3,5 +3,6 @@ User-agent: *
 Allow: /
 Disallow: /metriques
 Disallow: /assistant
+Disallow: /espace
 
 Sitemap: https://acquit-solutions.fr/sitemap.xml

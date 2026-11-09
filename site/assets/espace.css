@@ -1,0 +1,118 @@
+/* Espace client Acquit — univers « piste B » : fond crème chaud, accent terre cuite,
+   barre latérale brun foncé. Le vert reste réservé à ce qui va bien. */
+:root{
+  --fond:#FBF6EE; --surface:#FFFFFF; --filet:#EADFCF; --bordure:#9C8C79;
+  --encre:#1F1A17; --encre-2:#5E554C; --accent:#A33E15; --accent-voile:#F6E3D6;
+  --cote:#2A211C; --cote-survol:#3A2E27; --cote-texte:#E9DFD2; --cote-pale:#CDBFAF;
+  --vert:#1C6B4E; --vert-voile:#E3F1EA; --ambre:#8A5A0B; --ambre-voile:#FBF1DF; --rouge:#A2302A; --rouge-voile:#F9E6E4;
+  --focus:#2D5BA8;
+  --serif:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--fond);color:var(--encre);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+a{color:var(--accent)}a:hover{color:var(--encre)}
+h1,h2{font-family:var(--serif);font-weight:600;margin:0;text-wrap:balance}
+h1{font-size:34px;line-height:40px}
+h2{font-size:22px;line-height:28px}
+p{margin:0}
+.muet{color:var(--encre-2)}
+.petit{font-size:13px}
+.fort{font-weight:600}
+.chiffres{font-variant-numeric:tabular-nums}
+.masque{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.ecran.centre{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px max(16px,env(safe-area-inset-left,0px))}
+.tampon{color:var(--vert)}
+.tourne{animation:tourne 1.6s linear infinite}
+@keyframes tourne{to{transform:rotate(360deg)}}
+
+.marque{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--encre);font-family:var(--serif);font-weight:600;font-size:20px}
+.marque svg{color:var(--vert)}
+.marque.clair{color:#FBF6EE}.marque.clair svg{color:#9FD9BC}
+
+.carte-connexion{width:min(440px,100%);background:var(--surface);border:1px solid var(--filet);border-radius:20px;padding:32px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 50px rgba(31,26,23,.08);animation:monte .35s ease-out both}
+form{display:flex;flex-direction:column;gap:10px}
+label{font-size:14px;font-weight:600}
+input,select{font:inherit;font-size:16px;color:var(--encre);background:var(--surface);border:1px solid var(--bordure);border-radius:12px;min-height:46px;padding:0 14px;width:100%}
+.principal{min-height:48px;padding:0 24px;border:none;border-radius:999px;background:var(--accent);color:#FFFFFF;font:inherit;font-size:16px;font-weight:600;cursor:pointer;transition:transform .15s ease,background .15s ease}
+.principal:hover{background:#8C3410}
+.principal:active{transform:scale(.98)}
+.principal[disabled]{opacity:.6;cursor:wait}
+.lien-bouton{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.lien-bouton:hover{color:#FFFFFF}
+.erreur{color:var(--rouge);font-size:14px}
+.ok{color:var(--vert);font-weight:600}
+.encart-ok{background:var(--vert-voile);color:var(--encre);border-radius:12px;padding:14px 16px;font-size:15px;animation:monte .3s ease-out both}
+
+/* Application */
+.app{display:flex;flex-wrap:wrap;min-height:100vh}
+.cote{flex:1 1 230px;max-width:100%;background:var(--cote);color:var(--cote-texte);padding:20px 12px;display:flex;flex-direction:column;gap:18px}
+.cote .marque{padding:0 12px}
+.liens{display:flex;flex-direction:column;gap:4px}
+.nav{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;color:var(--cote-texte);text-decoration:none;font-size:15px;transition:background .15s ease}
+.nav:hover{background:var(--cote-survol);color:#FFFFFF}
+.nav.on{background:var(--fond);color:var(--encre);font-weight:600}
+.nav i{font-style:normal;font-size:11px;color:var(--cote-pale);border:1px solid #4A3C33;border-radius:999px;padding:1px 8px}
+.nav.on i{color:var(--encre-2);border-color:var(--filet)}
+.pied-cote{margin-top:auto;padding:16px 12px 0;border-top:1px solid #4A3C33;display:flex;flex-direction:column;gap:2px;color:#FBF6EE}
+.pied-cote .petit{color:var(--cote-pale);word-break:break-all}
+.lien-clair{align-self:flex-start;margin-top:8px;background:none;border:none;color:var(--cote-pale);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;padding:0}
+.lien-clair:hover{color:#FFFFFF}
+.contenu{flex:999 1 560px;min-width:0;padding:32px max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column}
+@media (min-width:760px){.contenu{padding:32px 36px 56px}}
+.vue{display:flex;flex-direction:column;gap:22px;animation:monte .3s ease-out both;max-width:1180px}
+.entete{display:flex;flex-direction:column;gap:6px}
+.bloc{background:var(--surface);border:1px solid var(--filet);border-radius:20px;padding:24px}
+.tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr));gap:12px}
+.tuile{background:var(--surface);border:1px solid var(--filet);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:2px}
+.tuile b{font-size:21px;line-height:28px}
+
+.carte-bloc{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.carte-col{flex:1.3 1 320px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.fiche-col{flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:10px}
+#carte{width:100%;height:auto;display:block}
+#carte path{stroke:var(--fond);stroke-width:1.2;cursor:pointer;transition:fill .45s ease}
+#carte path:hover{stroke:var(--encre);stroke-width:2.5}
+#carte path.choisi{stroke:var(--encre);stroke-width:4}
+.lecteur{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rond{width:42px;height:42px;border-radius:999px;border:none;background:var(--accent);color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#mois{flex:1;min-width:140px;accent-color:var(--accent);min-height:auto;border:none;padding:0}
+.legende{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--encre-2);flex-wrap:wrap}
+.legende i{width:22px;height:10px;border-radius:3px}
+.legende i:nth-of-type(1){background:#F4E6D6}.legende i:nth-of-type(2){background:#E8C9A8}.legende i:nth-of-type(3){background:#D49C70}.legende i:nth-of-type(4){background:#B9693F}.legende i:nth-of-type(5){background:#8E3A14}
+.fiche{background:var(--fond);border:1px solid var(--filet);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.pastille{align-self:flex-start;font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--ambre-voile);color:var(--ambre)}
+.pastille.respire{background:var(--vert-voile);color:var(--vert)}
+.pastille.tension{background:var(--rouge-voile);color:var(--rouge)}
+.chiffres-fiche{display:flex;gap:24px;flex-wrap:wrap}
+.chiffres-fiche div{display:flex;flex-direction:column}
+.chiffres-fiche b{font-size:26px;line-height:32px}
+.barres{display:flex;align-items:flex-end;gap:3px;height:52px}
+.barres span{flex:1;background:#E8C9A8;border-radius:3px 3px 0 0;transition:height .4s ease,background .2s ease}
+.barres span.courant{background:var(--accent)}
+
+.formulaire{display:flex;flex-direction:column;gap:16px;max-width:720px}
+.champ{display:flex;flex-direction:column;gap:6px;min-width:0}
+.deux{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:16px}
+.actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+
+@keyframes monte{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Téléphone : la barre latérale devient un bandeau compact et défilant */
+@media (max-width:759px){
+  .cote{flex-basis:100%;padding:12px 0 10px;gap:10px;position:sticky;top:0;z-index:5}
+  .cote .marque{padding:0 16px}
+  .liens{flex-direction:row;overflow-x:auto;gap:6px;padding:0 16px;scrollbar-width:none}
+  .liens::-webkit-scrollbar{display:none}
+  .nav{flex:none;min-height:38px;font-size:14px;white-space:nowrap;gap:6px}
+  .nav i{display:none}
+  .pied-cote{display:none}
+  h1{font-size:28px;line-height:34px}
+  .bloc{padding:16px;border-radius:16px}
+}
+.lien-deco{background:none;border:none;padding:0;font:inherit;color:var(--accent);text-decoration:underline;cursor:pointer}
