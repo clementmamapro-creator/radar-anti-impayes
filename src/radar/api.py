@@ -15,6 +15,7 @@ import time
 from fastapi import FastAPI, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -39,6 +40,34 @@ app = FastAPI(
 _origins = [o.strip() for o in os.getenv("RADAR_CORS_ORIGINS", "").split(",") if o.strip()]
 if _origins:
     app.add_middleware(CORSMiddleware, allow_origins=_origins, allow_methods=["GET"], allow_headers=["*"])
+
+
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+DOMAINE = os.getenv("RADAR_DOMAINE", "acquit-solutions.fr")
+
+
+@app.middleware("http")
+async def adresses_canoniques(request: Request, call_next):
+    """Une seule adresse par page pour Google : domaine principal, sans index.html ni barre finale.
+
+    - acquit-solutions.onrender.com -> acquit-solutions.fr (évite un site en double dans Google)
+    - /index.html -> / ; /a-propos/ -> /a-propos
+    Les fichiers statiques versionnés (assets) sont mis en cache une semaine par le navigateur.
+    """
+    hote = (request.headers.get("host") or "").split(":")[0]
+    chemin = request.url.path
+    if hote.endswith(".onrender.com") and request.method in ("GET", "HEAD"):
+        return RedirectResponse(f"https://{DOMAINE}{chemin}" + (f"?{request.url.query}" if request.url.query else ""),
+                                status_code=301)
+    if chemin == "/index.html":
+        return RedirectResponse("/", status_code=301)
+    if len(chemin) > 1 and chemin.endswith("/") and chemin.strip("/") in PAGES:
+        return RedirectResponse(chemin.rstrip("/"), status_code=301)
+    reponse = await call_next(request)
+    if chemin.startswith("/assets/") and reponse.status_code == 200:
+        reponse.headers["Cache-Control"] = "public, max-age=604800"
+    return reponse
 
 
 @app.middleware("http")

@@ -52,7 +52,7 @@
     h += '<p class="fiche-id">' + esc(meta.join(" · ")) + "</p>";
     h += '<div class="fiche-reco"><span class="niveau ' + niv[0] + '">' + niv[1] + "</span>";
     if (r.recommandation) {
-      h += "<h3>" + esc(r.recommandation.titre) + "</h3><p>" + esc(r.recommandation.texte) + "</p>";
+      h += '<h2 class="fiche-reco-titre">' + esc(r.recommandation.titre) + "</h2><p>" + esc(r.recommandation.texte) + "</p>";
     }
     h += "</div>";
     if (r.statut === "score") {

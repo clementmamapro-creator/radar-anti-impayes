@@ -263,3 +263,19 @@ def test_page_404_personnalisee():
 
     r = TestClient(api.app).get("/une/adresse/inexistante")
     assert r.status_code == 404 and "pas sur la facture" in r.text
+
+
+def test_adresses_canoniques_pour_google():
+    from fastapi.testclient import TestClient
+
+    from radar import api
+
+    c = TestClient(api.app)
+    r = c.get("/index.html", follow_redirects=False)
+    assert r.status_code == 301 and r.headers["location"] == "/"
+    r = c.get("/a-propos/", follow_redirects=False)
+    assert r.status_code == 301 and r.headers["location"] == "/a-propos"
+    r = c.get("/a-propos", headers={"host": "acquit-solutions.onrender.com"}, follow_redirects=False)
+    assert r.status_code == 301 and r.headers["location"] == "https://acquit-solutions.fr/a-propos"
+    r = c.get("/assets/acquit.css", headers={"accept-encoding": "gzip"})
+    assert r.headers.get("cache-control") == "public, max-age=604800" and r.headers.get("content-encoding") == "gzip"
