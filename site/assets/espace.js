@@ -36,7 +36,7 @@
     } catch (e) { ecran("indispo"); return; }
     if (!window.supabase) { ecran("indispo"); return; }
     sb = window.supabase.createClient(conf.supabase_url, conf.supabase_publishable_key, {
-      auth: { flowType: "pkce", persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      auth: { flowType: "implicit", persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
     });
     sb.auth.onAuthStateChange(function (evt) {
       if (evt === "SIGNED_OUT") { user = null; entreprise = null; ecran("connexion"); }
@@ -44,7 +44,8 @@
     geo = await fetch("assets/carte-france.json").then(function (r) { return r.json(); }).catch(function () { return null; });
     remplirDepartements();
     var res = await sb.auth.getSession();
-    if (/[?&](code|error)=/.test(location.search)) history.replaceState(null, "", location.pathname + location.hash);
+    // Le lien e-mail revient avec les jetons dans l'adresse : on les retire aussitôt (historique, partage d'écran).
+    if (/[?&](code|error)=/.test(location.search) || /access_token=|error_description=/.test(location.hash)) history.replaceState(null, "", location.pathname + "#secteur");
     var session = res.data && res.data.session;
     if (!session) { ecran("connexion"); return; }
     await ouvrir(session.user);
