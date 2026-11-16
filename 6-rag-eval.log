@@ -1,0 +1,37 @@
+INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 401 Unauthorized"
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/runner/work/radar-anti-impayes/radar-anti-impayes/src/radar/__main__.py", line 136, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/runner/work/radar-anti-impayes/radar-anti-impayes/src/radar/__main__.py", line 116, in main
+    res[nom]["hybride"] = evaluer(assistant.articles, qs, k=k,
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/radar-anti-impayes/radar-anti-impayes/src/radar/rag/evaluation.py", line 37, in evaluer
+    trouves = [a.num for a in recherche(q["question"], k)]
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/radar-anti-impayes/radar-anti-impayes/src/radar/__main__.py", line 117, in <lambda>
+    recherche=lambda q, kk: assistant.rechercher(q, kk))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/radar-anti-impayes/radar-anti-impayes/src/radar/rag/assistant.py", line 132, in rechercher
+    mots, _ = self._appel(REFORMULATION, entree, 120)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/radar-anti-impayes/radar-anti-impayes/src/radar/rag/assistant.py", line 111, in _appel
+    msg = self.client.messages.create(thinking={"type": "disabled"}, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/anthropic/_utils/_utils.py", line 294, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/anthropic/resources/messages/messages.py", line 1247, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/anthropic/_base_client.py", line 1687, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/anthropic/_base_client.py", line 1238, in request
+    return self._request(cast_to, options, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.16/x64/lib/python3.12/site-packages/anthropic/_base_client.py", line 1341, in _request
+    raise self._make_status_error_from_response(response) from None
+anthropic.AuthenticationError: Error code: 401 - {'type': 'error', 'error': {'type': 'authentication_error', 'message': 'invalid x-api-key'}, 'request_id': 'req_011Ch6pyzz9xCQTbL9VzfsvL'}
